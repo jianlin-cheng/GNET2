@@ -1,0 +1,62 @@
+[
+    {
+        "definitions" : [
+            {
+                "column" : 8,
+                "file" : "C:/Users/chen/Documents/Dropbox/MU/workspace/new/Rpackage/GNET2/src/gnet_rcpp.cpp",
+                "kind" : 6,
+                "line" : 4,
+                "name" : "sample_sd(NumericVector)",
+                "parent_name" : "",
+                "usr" : "c:@F@sample_sd#$@N@Rcpp@C@Vector>#VI14#@N@Rcpp@CT>1#T@PreserveStorage#"
+            },
+            {
+                "column" : 8,
+                "file" : "C:/Users/chen/Documents/Dropbox/MU/workspace/new/Rpackage/GNET2/src/gnet_rcpp.cpp",
+                "kind" : 6,
+                "line" : 11,
+                "name" : "pearsoncoeff(NumericVector, NumericVector)",
+                "parent_name" : "",
+                "usr" : "c:@F@pearsoncoeff#$@N@Rcpp@C@Vector>#VI14#@N@Rcpp@CT>1#T@PreserveStorage#S0_#"
+            },
+            {
+                "column" : 8,
+                "file" : "C:/Users/chen/Documents/Dropbox/MU/workspace/new/Rpackage/GNET2/src/gnet_rcpp.cpp",
+                "kind" : 6,
+                "line" : 18,
+                "name" : "rowwise_avg_cor(NumericMatrix, LogicalVector)",
+                "parent_name" : "",
+                "usr" : "c:@F@rowwise_avg_cor#$@N@Rcpp@C@Matrix>#VI14#@N@Rcpp@CT>1#T@PreserveStorage#$@N@Rcpp@C@Vector>#VI10#@N@Rcpp@CT>1#T@PreserveStorage#"
+            },
+            {
+                "column" : 8,
+                "file" : "C:/Users/chen/Documents/Dropbox/MU/workspace/new/Rpackage/GNET2/src/gnet_rcpp.cpp",
+                "kind" : 6,
+                "line" : 33,
+                "name" : "update_score(NumericMatrix, LogicalVector, LogicalVector)",
+                "parent_name" : "",
+                "usr" : "c:@F@update_score#$@N@Rcpp@C@Matrix>#VI14#@N@Rcpp@CT>1#T@PreserveStorage#$@N@Rcpp@C@Vector>#VI10#@N@Rcpp@CT>1#T@PreserveStorage#S1_#"
+            },
+            {
+                "column" : 15,
+                "file" : "C:/Users/chen/Documents/Dropbox/MU/workspace/new/Rpackage/GNET2/src/gnet_rcpp.cpp",
+                "kind" : 6,
+                "line" : 57,
+                "name" : "find_new_split(NumericMatrix, NumericMatrix, IntegerVector, LogicalVector)",
+                "parent_name" : "",
+                "usr" : "c:@F@find_new_split#$@N@Rcpp@C@Matrix>#VI14#@N@Rcpp@CT>1#T@PreserveStorage#S0_#$@N@Rcpp@C@Vector>#VI13#@N@Rcpp@CT>1#T@PreserveStorage#$@N@Rcpp@C@Vector>#VI10#@N@Rcpp@CT>1#T@PreserveStorage#"
+            },
+            {
+                "column" : 15,
+                "file" : "C:/Users/chen/Documents/Dropbox/MU/workspace/new/Rpackage/GNET2/src/gnet_rcpp.cpp",
+                "kind" : 6,
+                "line" : 96,
+                "name" : "build_regression_tree_baysian(NumericMatrix, NumericMatrix, int, double, int)",
+                "parent_name" : "",
+                "usr" : "c:@F@build_regression_tree_baysian#$@N@Rcpp@C@Matrix>#VI14#@N@Rcpp@CT>1#T@PreserveStorage#S0_#I#d#I#"
+            }
+        ],
+        "file" : "C:/Users/chen/Documents/Dropbox/MU/workspace/new/Rpackage/GNET2/src/gnet_rcpp.cpp",
+        "file_last_write" : 1553546881
+    }
+]

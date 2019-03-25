@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1553550429736.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3535745996",
+    "id" : "BEE177C",
+    "lastKnownWriteTime" : 1553556976,
+    "last_content_update" : 1553556976716,
+    "path" : "~/Dropbox/MU/workspace/new/Rpackage/GNET2/NAMESPACE",
+    "project_path" : "NAMESPACE",
+    "properties" : {
+        "cursorPosition" : "4,13",
+        "scrollLine" : "0"
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_namespace"
+}

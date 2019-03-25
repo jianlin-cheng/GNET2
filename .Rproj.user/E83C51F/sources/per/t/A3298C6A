@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1553549645405.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "917350872",
+    "id" : "A3298C6A",
+    "lastKnownWriteTime" : 1553557522,
+    "last_content_update" : 1553557522440,
+    "path" : "~/Dropbox/MU/workspace/new/demo.R",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "28,9",
+        "scrollLine" : "4"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

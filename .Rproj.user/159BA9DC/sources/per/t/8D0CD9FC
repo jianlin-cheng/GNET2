@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1553556952633.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2227217919",
+    "id" : "8D0CD9FC",
+    "lastKnownWriteTime" : 1553557530,
+    "last_content_update" : 1553557530,
+    "path" : "~/Dropbox/MU/workspace/new/Rpackage/GNET2/R/gnet_r.R",
+    "project_path" : "R/gnet_r.R",
+    "properties" : {
+        "cursorPosition" : "341,1",
+        "docOutlineVisible" : "1",
+        "scrollLine" : "320"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

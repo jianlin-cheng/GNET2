@@ -1,0 +1,14 @@
+{
+    "args" : [
+        "-ID:/tools/RStudio/resources/libclang/builtin-headers/3.4",
+        "-IC:/RBuildTools/3.5/mingw_64/x86_64-w64-mingw32/include",
+        "-IC:/RBuildTools/3.5/mingw_64/x86_64-w64-mingw32/include/c++",
+        "-IC:/RBuildTools/3.5/mingw_64/x86_64-w64-mingw32/include/c++/x86_64-w64-mingw32",
+        "-ID:/tools/R/R-3.5.2/library/Rcpp/include",
+        "-ID:/tools/R/R-3.5.2/include",
+        "-DNDEBUG"
+    ],
+    "hash" : "1553550525",
+    "is_cpp" : true,
+    "pch" : "Rcpp"
+}
