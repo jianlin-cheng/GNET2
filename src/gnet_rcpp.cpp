@@ -97,9 +97,9 @@ NumericMatrix build_regression_tree_baysian(NumericMatrix X,NumericMatrix Y, int
   LogicalVector feature_remaining(X.ncol());
   int feature_num = 0;
   IntegerVector subgroup_indicator = rep(0,X.nrow());
-  NumericMatrix group_table(max_partition_level,X.nrow()+1);
+  NumericMatrix group_table(max_partition_level-1,X.nrow()+1);
   IntegerVector groups(X.nrow());
-  while (feature_num < max_partition_level && is_false(all(feature_remaining == TRUE)) && is_false(all(groups == -1))){
+  while (feature_num+1 < max_partition_level && is_false(all(feature_remaining == TRUE)) && is_false(all(groups == -1))){
     IntegerVector new_group_table_row = find_new_split(X, Y, groups, feature_remaining);
     group_table(feature_num,_) = new_group_table_row;
     feature_num++;
@@ -113,13 +113,13 @@ NumericMatrix build_regression_tree_baysian(NumericMatrix X,NumericMatrix Y, int
     double avg_cor_left = rowwise_avg_cor(Y,left_idx);
     double avg_cor_right = rowwise_avg_cor(Y,right_idx);
     
-    if((sum(left_idx)<min_divide_size) | (avg_cor_left > cor_cutoff)){
+    if((sum(left_idx) <= min_divide_size) | (avg_cor_left > cor_cutoff)){
       groups[left_idx] = -1;
     } else {
       groups[left_idx] = next_group_idx;
       next_group_idx++;
     }
-    if((sum(right_idx)<min_divide_size) | (avg_cor_right > cor_cutoff)){
+    if((sum(right_idx) <= min_divide_size) | (avg_cor_right > cor_cutoff)){
       groups[right_idx] = -1;
     } else {
       groups[right_idx] = next_group_idx;
@@ -128,3 +128,5 @@ NumericMatrix build_regression_tree_baysian(NumericMatrix X,NumericMatrix Y, int
   }
   return group_table;
 }
+
+

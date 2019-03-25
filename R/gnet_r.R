@@ -3,8 +3,6 @@ library(ggplot2)
 library(scales)
 library(grid)
 library(Rcpp)
-sourceCpp('~/Dropbox/MU/workspace/new/src/gnet_rcpp.cpp')
-
 
 calc_likelihood_score = function(x,labels){
   score_total = 0
@@ -118,7 +116,8 @@ build_regression_tree_baysianR = function(X,Y,max_partition_level,cor_cutoff,min
 assign_tf_baysian = function(tf_data,gene_data,gene_group_table,tf_list,
                              min_group_size,max_partition_level,cor_cutoff,min_divide_size){
   X = t(tf_data)
-  group_labels = 0:max(gene_group_table)
+  group_labels = unique(gene_group_table)
+  group_labels = group_labels[group_labels!=-1]
   tf_group_table = matrix(0,nrow = 0,ncol = ncol(tf_data))
   group_table = matrix(0,nrow = 0,ncol = ncol(tf_data)+2)
   i = 0
@@ -127,6 +126,7 @@ assign_tf_baysian = function(tf_data,gene_data,gene_group_table,tf_list,
     if (sum(gene_idx) >= min_group_size){
       Y = t(gene_data[gene_idx,])
       group_table_i = build_regression_tree_baysian(X,Y,max_partition_level,cor_cutoff,min_divide_size)
+      group_table_i <- group_table_i[apply(group_table_i, 1, function(x)(sum(x!=0)))!=0,]
       tf_group_table = rbind(tf_group_table,get_leaf_labels(group_table_i))
       group_table = rbind(group_table,cbind(i,group_table_i))
       i = i+1
@@ -188,47 +188,43 @@ kneepointDetection <-function (vect) {
   }
   return(MinIndex)
 }
-  
+
 run_gnet = function(gene_data,tf_data,init_group_num = 5,max_partition_level = 3,
                     cor_cutoff = 0.9,min_divide_size = 3,min_group_size = 2,max_iter = 5,min_group_num=3){
   print('Determine initial group number')
   tf_list = rownames(tf_data)
-  gene_group_table = as.numeric(kmeans(gene_data,centers = init_group_num)$cluster)-1
-  assign_tf_list = assign_tf_baysian(tf_data,gene_data,gene_group_table,tf_list,
-                                     min_group_size,max_partition_level,cor_cutoff,min_divide_size)
-  tf_group_table = assign_tf_list[[2]]
-  avg_cor_list = rep(0,nrow(tf_group_table))
-  for(i in 1:nrow(tf_group_table)){
-    x_group = gene_data[gene_group_table==(i-1),]
-    avg_cor_list[i] = mean(get_correlation_list(x_group,tf_group_table[i,]))
+  avg_cor_list <- c()
+  for(i in 2:min(init_group_num,nrow(gene_data)-1)){
+    gene_group_table = as.numeric(kmeans(gene_data,centers = i)$cluster)-1
+    avg_cor_list <- c(avg_cor_list,mean(get_correlation_list(t(gene_data),gene_group_table)))
+    if(length(avg_cor_list)>=min_group_num){
+      o = order(avg_cor_list,decreasing = T)
+      y = avg_cor_list[o]
+      kn = kneepointDetection(y)
+      groups_keep = o[1:max(kn,min_group_num)]
+    }else{
+      groups_keep = 1:length(avg_cor_list)
+    }
+    gene_group_table[!(gene_group_table %in% groups_keep)] <- -1
   }
-  if(length(avg_cor_list)>=min_group_num){
-    o = order(avg_cor_list,decreasing = T)
-    y = avg_cor_list[o]
-    kn = kneepointDetection(y)
-    groups_keep = o[1:max(kn,min_group_num)]
-  }else{
-    groups_keep = 1:length(avg_cor_list)
-  }
-  # plot(sort(avg_cor_list,decreasing = T))
-  assign_tf_list[[2]] <- assign_tf_list[[2]][groups_keep,]
-  
+
+
   print('Building module networks')
   for (i in 1:max_iter) {
     print(paste('iteration',i))
+    assign_tf_list = assign_tf_baysian(tf_data,gene_data,gene_group_table,tf_list,
+                                       min_group_size,max_partition_level,cor_cutoff,min_divide_size)
     gene_group_table_new = assign_gene(gene_data,assign_tf_list[[2]])
-    if(all(length(gene_group_table)==length(gene_group_table_new)) && 
+    if(all(length(gene_group_table)==length(gene_group_table_new)) &&
        all(gene_group_table==gene_group_table_new)){
       break
     }else{
       gene_group_table =  gene_group_table_new
-      assign_tf_list = assign_tf_baysian(tf_data,gene_data,gene_group_table,tf_list,
-                                         min_group_size,max_partition_level,cor_cutoff,min_divide_size)
     }
   }
   tree_table_all = assign_tf_list[[1]]
   colnames(tree_table_all) <- c('group','feature',colnames(gene_data))
-  
+
   gene_list_all = NULL
   groups_unique = unique(gene_group_table)
   for (i in 1:length(groups_unique)) {
@@ -236,8 +232,7 @@ run_gnet = function(gene_data,tf_data,init_group_num = 5,max_partition_level = 3
                            cbind.data.frame('gene'=rownames(gene_data)[gene_group_table==groups_unique[i]],
                                             'group'=i-1,stringsAsFactors=F))
   }
-  return(list('gene_data'=gene_data,'tf_data'=tf_data,
-              'tf_group_table'=tree_table_all,'gene_group_table'=gene_list_all))
+  return(list('tf_group_table'=tree_table_all,'gene_group_table'=gene_list_all))
 }
 
 multiplot <- function(..., plotlist=NULL, cols=1, layout=NULL) {
@@ -265,7 +260,7 @@ plot_gnet <- function(gnet_result,group_idx,plot_out_file){
   tf_data <- gnet_result$tf_data
   tf_group_table <- gnet_result$tf_group_table
   gene_group_table <- gnet_result$gene_group_table
-  
+
   exp_data1 = gene_data[gene_group_table$gene[gene_group_table$group==group_idx],]
   tf_data1 = tf_data[tf_group_table[tf_group_table[,1]==group_idx,2]+1,]
   group_table1 = tf_group_table[tf_group_table[,1]==group_idx,3:ncol(tf_group_table)]
@@ -276,10 +271,10 @@ plot_gnet <- function(gnet_result,group_idx,plot_out_file){
   exp_data2 <- exp_data1[,row_order]
   test_regulators_names <- rownames(tf_data2)
   layout=matrix(c(1:length(test_regulators_names),rep(length(test_regulators_names)+1,
-                                                      length(test_regulators_names))),ncol=1)
+                                                      length(test_regulators_names)*2)),ncol=1)
   regulators_plist <- list()
   scaleFUN <- function(x) sprintf("%.3f", x)
-  
+
   # add TF bars
   for(i in 1:length(test_regulators_names)){
     reg_data_mask <- group_table2[i,]==-1
@@ -287,14 +282,17 @@ plot_gnet <- function(gnet_result,group_idx,plot_out_file){
     exp_val[reg_data_mask] <- NA
     lengend_low <- min(exp_val,na.rm = T)
     lengend_high <- max(exp_val,na.rm = T)
-    exp_val1 <- rbind.data.frame(matrix(NA,nrow = 1,ncol = length(exp_val)),
-                                 exp_val,matrix(NA,nrow = 1,ncol = length(exp_val)),stringsAsFactors=F)
+    exp_val1 <- rbind.data.frame(matrix(NA,nrow = 1,ncol = length(exp_val)),exp_val,stringsAsFactors=F)
+
     rownames(exp_val1) <- 1:nrow(exp_val1)
     exp_val.m <- melt(exp_val1)
     exp_val.m <- cbind.data.frame('y_idx'=rep(1:nrow(exp_val1),ncol(exp_val1)),exp_val.m,stringsAsFactors=F)
-    
-    
-    p <- ggplot(exp_val.m, aes(variable, y_idx)) + geom_tile(aes(fill = value), colour = "white") + 
+    exp_label = rep('',ncol(exp_val1))
+    exp_label[group_table2[i,]==0] <- 'Low'
+    exp_label[group_table2[i,]==1] <- 'High'
+
+    p <- ggplot(exp_val.m, aes(variable, y_idx)) + geom_tile(aes(fill = value), colour = "white") +
+      scale_x_discrete(labels=exp_label)+
       scale_fill_gradient(low = "darkgreen",high = "red",na.value = "white",
                           limits=c(lengend_low, lengend_high),
                           breaks=seq(lengend_low,lengend_high,length.out = 4),labels=scaleFUN)+
@@ -303,25 +301,24 @@ plot_gnet <- function(gnet_result,group_idx,plot_out_file){
             legend.title=element_blank(),panel.grid.minor = element_blank(),
             legend.key.size = unit(0.2, "cm"),
             axis.line = element_line(colour = "white"),legend.position="right",
-            legend.box = "vertical",axis.title.x=element_blank(),axis.text.x=element_blank(),
+            legend.box = "vertical",axis.title.x=element_blank(),
             axis.ticks.x=element_blank(),legend.text=element_text(size=7),
             axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())+
       labs(title = test_regulators_names[i])
     regulators_plist[[i]] <- p
   }
   # add heatmap
-  rownames(exp_data2) <- NULL
   exp_lengend_low <- min(exp_data2)
   exp_lengend_high <- max(exp_data2)
   test_data.m <- melt(cbind.data.frame('gene'=rownames(exp_data2),exp_data2,stringsAsFactors=F))
-  p <- ggplot(test_data.m, aes(variable, gene)) + geom_tile(aes(fill = value), colour = "white") + 
+  p <- ggplot(test_data.m, aes(variable, gene)) + geom_tile(aes(fill = value), colour = "white") +
     scale_fill_gradient(low = "darkgreen",high = "red",na.value = "white",
                         limits=c(exp_lengend_low, exp_lengend_high),
                         breaks=seq(exp_lengend_low,exp_lengend_high,length.out = 4),labels=scaleFUN)+
     theme(axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank(),
           axis.title.x=element_blank(),legend.text=element_text(size=7),legend.key.size = unit(0.2, "cm"),
           panel.border = element_blank(), panel.grid.major = element_blank(),
-          panel.background = element_blank(),legend.title=element_blank(),
+          panel.background = element_blank(),legend.title=element_blank(),axis.text.x = element_text(angle = 45, hjust = 1),
           panel.grid.minor = element_blank(), axis.line = element_line(colour = "white"),
           legend.position="right", legend.box = "vertical")
   regulators_plist[[length(regulators_plist)+1]] <- p
@@ -331,15 +328,18 @@ plot_gnet <- function(gnet_result,group_idx,plot_out_file){
 }
 
 plot_group_correlation <- function(gene_group_table,gene_data){
+  gene_group_table <- gene_group_table$group
   avg_cor_list <- rep(0,length(unique(gene_group_table)))
   for(i in 1:length(avg_cor_list)){
     cor_m <- cor(t(gene_data[gene_group_table==(i-1),]))
     avg_cor_list[i] <- mean(cor_m[upper.tri(cor_m)])
   }
-  avg_cor_list2 <- sort(avg_cor_list[-c(which.max(avg_cor_list),which.min(avg_cor_list))],decreasing = T)
+  avg_cor_list2 <- sort(avg_cor_list,decreasing = T)
+
   kp <- kneepointDetection(avg_cor_list2)
   plot(1:length(avg_cor_list2),avg_cor_list2,col=c(rep(3,kp),rep(2,length(avg_cor_list2)-kp)),
-       pch=1,cex =0.6,xlab='Cluster number',ylab='Average correlation')
+       pch=1,cex =0.6,xlab='Cluster number',ylab='Average correlation',main='Cluster number vs. Average correlation')
+
   k1 <- avg_cor_list2[1:(kp)]
   k2 <- 1:kp
   if(kp>1){
@@ -353,15 +353,13 @@ plot_group_correlation <- function(gene_group_table,gene_data){
     lines(x=l2, y=predict(f2, newdata=data.frame(x=l2)),col=2,lwd=2)
   }
 }
-gnet <- function(rnaseq_file,tf_list_file,init_group_num = 8,max_partition_level = 3,
+
+gnet <- function(rnaseq_data,tf_list,init_group_num = 8,max_partition_level = 3,
                  cor_cutoff = 0.9,min_divide_size = 3,min_group_size = 2,max_iter = 5,min_group_num=3){
-  rnaseq_data = read.csv(rnaseq_file,row.names = 1)
-  tf_list = read.csv(tf_list_file,header = F,as.is = T)$V1
   gene_data = rnaseq_data[!rownames(rnaseq_data)%in%tf_list,]
   tf_data = rnaseq_data[tf_list,]
   result_all = run_gnet(gene_data,tf_data,init_group_num,max_partition_level,cor_cutoff,min_divide_size,
                         min_group_size,max_iter,min_group_num)
-  
   tf_group_table = result_all[[1]]
   gene_group_table = result_all[[2]]
   return(list('gene_data'=gene_data,'tf_data'=tf_data,
@@ -370,37 +368,5 @@ gnet <- function(rnaseq_file,tf_list_file,init_group_num = 8,max_partition_level
 
 
 
-max_partition_level = 4
-cor_cutoff = 0.9
-min_divide_size = 3
-min_group_size = 3
-max_iter = 5
-min_group_num = 3
-init_group_num = 5
-
-# set.seed(1)
-# X = matrix(runif(500,0,1),10,50)
-# Y = matrix(runif(1500,0,1),10,150)
-# 
-# test1 = build_regression_tree_baysian(X,Y,max_partition_level,cor_cutoff,min_divide_size)
-
-
-
-#test1
-set.seed(1)
-
-rnaseq_data <- read.csv('~/Dropbox/MU/workspace/new/data/test/rnaseq_data.csv',row.names = 1)
-tf_list <- read.csv('~/Dropbox/MU/workspace/new/data/test/tf_list.csv',header = F)$V1
-
-gene_data = rnaseq_data[!rownames(rnaseq_data)%in%tf_list,]
-tf_data = rnaseq_data[tf_list,]
-
-gene_group_table = as.numeric(kmeans(gene_data,centers = init_group_num)$cluster)-1
-assign_tf_list = assign_tf_baysian(tf_data,gene_data,gene_group_table,tf_list,
-                                   min_group_size,max_partition_level,cor_cutoff,min_divide_size)
-assign_tf_list1 = assign_tf_baysianR(tf_data,gene_data,gene_group_table,tf_list,
-                                   min_group_size,max_partition_level,cor_cutoff,min_divide_size)
-gnet_result = run_gnet(gene_data,tf_data,init_group_num,max_partition_level,cor_cutoff,min_divide_size,
-                       min_group_size,max_iter,min_group_num)
 
 
