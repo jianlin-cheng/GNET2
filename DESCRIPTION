@@ -10,3 +10,9 @@ License: Apache License 2.0
 Encoding: UTF-8
 LazyData: true
 LinkingTo: Rcpp
+Imports:
+    dplyr,
+    reshape2,
+    scales,
+    grid,
+    ggplot2
