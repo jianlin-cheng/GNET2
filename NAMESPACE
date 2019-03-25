@@ -1,3 +1,8 @@
 import(Rcpp)
+import(reshape2)
+import(ggplot2)
+import(scales)
+import(grid)
+import(Rcpp)
 exportPattern("^[[:alpha:]]+")
 useDynLib(GNET2)
