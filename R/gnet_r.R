@@ -266,6 +266,40 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 }
 
 plot_tree <- function(gnet_result,group_idx){
+  tf_data = gnet_result$tf_data
+  gene_data = gnet_result$gene_data
+  tf_group_table = gnet_result$tf_group_table
+  gene_group_table = gnet_result$gene_group_table
+  tree_i = tf_group_table[tf_group_table[,1]==group_idx,]
+  label_list = c()
+  for(i in 1:nrow(tree_i)){
+    coverage_i = sum(tree_i[i,3:ncol(tree_i)]>=0)
+    feature_name_i = rownames(tf_data)[tree_i[i,2]+1]
+    split_i = round(max(tf_data[feature_name_i,tree_i[i,3:ncol(tree_i)]==0]),4)
+    label_list = c(label_list,paste0(feature_name_i,'\n <= ',split_i,'\nCoverage: ',coverage_i))
+  }
+  from_list <- to_list <- c()
+  for(i in 1:(nrow(tree_i)-1)){
+    for(j in 0:1){
+      split_i_j = tree_i[i,3:ncol(tree_i)]==j
+      for (k in (i+1):nrow(tree_i)) {
+        node_k = tree_i[k,3:ncol(tree_i)]>=0
+        if(identical(split_i_j,node_k)){
+          from_list <- c(from_list,i)
+          to_list <- c(to_list,k)
+        }
+      }
+    }
+  }
+  node_df <- create_node_df(n = nrow(tree_i),type = "a",label = label_list,style = "filled",
+                            color = "aqua",shape = "ellipse",width = 0.9,fontsize = 6)
+  edge_df <-create_edge_df(from = from_list,to = to_list)
+  graph <-create_graph(nodes_df = node_df,edges_df = edge_df)
+  render_graph(graph)
+}
+
+
+plot_gene_group <- function(gnet_result,group_idx){
   gene_data <- gnet_result$gene_data
   tf_data <- gnet_result$tf_data
   tf_group_table <- gnet_result$tf_group_table
