@@ -341,13 +341,8 @@ plot_tree <- function(gnet_result,group_idx){
   multiplot(plotlist = regulators_plist,cols = 1,layout = layout)
 }
 
-plot_group_correlation <- function(gene_group_table,gene_data){
-  gene_group_table <- gene_group_table$group
-  avg_cor_list <- rep(0,length(unique(gene_group_table)))
-  for(i in 1:length(avg_cor_list)){
-    cor_m <- cor(t(gene_data[gene_group_table==(i-1),]))
-    avg_cor_list[i] <- mean(cor_m[upper.tri(cor_m)])
-  }
+plot_group_correlation <- function(avg_cor_list){
+
   avg_cor_list2 <- sort(avg_cor_list,decreasing = T)
 
   kp <- kneepointDetection(avg_cor_list2)
@@ -366,6 +361,7 @@ plot_group_correlation <- function(gene_group_table,gene_data){
     f2 <- lm(l1 ~ l2)
     lines(x=l2, y=predict(f2, newdata=data.frame(x=l2)),col=2,lwd=2)
   }
+  return(which(avg_cor_list >= avg_cor_list2[kp]))
 }
 
 gnet <- function(rnaseq_data,tf_list,init_group_num = 8,max_partition_level = 3,
@@ -376,7 +372,12 @@ gnet <- function(rnaseq_data,tf_list,init_group_num = 8,max_partition_level = 3,
                         min_group_size,max_iter,min_group_num)
   tf_group_table = result_all[[1]]
   gene_group_table = result_all[[2]]
-  return(list('gene_data'=gene_data,'tf_data'=tf_data,
+  avg_cor_list <- rep(0,length(unique(gene_group_table$group)))
+  for(i in 1:length(avg_cor_list)){
+    cor_m <- cor(t(gene_data[gene_group_table$group==(i-1),]))
+    avg_cor_list[i] <- mean(cor_m[upper.tri(cor_m)])
+  }
+  return(list('gene_data'=gene_data,'tf_data'=tf_data,'group_score' = avg_cor_list,
               'tf_group_table'=tf_group_table,'gene_group_table'=gene_group_table))
 }
 
