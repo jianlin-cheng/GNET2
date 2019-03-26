@@ -7,14 +7,12 @@ double sample_sd(NumericVector X) {
   return sd1;
 }
 
-// [[Rcpp::export]]
 double pearsoncoeff(NumericVector X, NumericVector Y)
 {
   
   return (mean(X*Y)-mean(X)*mean(Y)) / (sample_sd(X)* sample_sd(Y));
 }
 
-// [[Rcpp::export]]
 double rowwise_avg_cor(NumericMatrix Y,LogicalVector row_slt) {
   NumericVector cor_list((sum(row_slt)-1)*sum(row_slt)/2);
   int k =0;
@@ -29,7 +27,6 @@ double rowwise_avg_cor(NumericMatrix Y,LogicalVector row_slt) {
   return mean(cor_list);
 }
 
-// [[Rcpp::export]]
 double update_score(NumericMatrix X,LogicalVector left_idx_bool,LogicalVector right_idx_bool) {
   double score_nosplit = 0;
   double score_left = 0;
@@ -53,7 +50,6 @@ double update_score(NumericMatrix X,LogicalVector left_idx_bool,LogicalVector ri
 }
 
 
-// [[Rcpp::export]]
 IntegerVector find_new_split(NumericMatrix X, NumericMatrix Y,IntegerVector groups, LogicalVector feature_remaining) {
   int best_feature = -1;
   double best_score = -pow(10,6);
