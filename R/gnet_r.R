@@ -295,7 +295,7 @@ plot_tree <- function(gnet_result,group_idx){
     exp_val1 <- rbind.data.frame(matrix(NA,nrow = 1,ncol = length(exp_val)),exp_val,stringsAsFactors=F)
 
     rownames(exp_val1) <- 1:nrow(exp_val1)
-    exp_val.m <- melt(exp_val1)
+    exp_val.m <- melt(exp_val1,id.vars = NULL)
     exp_val.m <- cbind.data.frame('y_idx'=rep(1:nrow(exp_val1),ncol(exp_val1)),exp_val.m,stringsAsFactors=F)
     exp_label = rep('',ncol(exp_val1))
     exp_label[group_table2[i,]==0] <- 'Low'
@@ -320,7 +320,7 @@ plot_tree <- function(gnet_result,group_idx){
   # add heatmap
   exp_lengend_low <- min(exp_data2)
   exp_lengend_high <- max(exp_data2)
-  test_data.m <- melt(cbind.data.frame('gene'=rownames(exp_data2),exp_data2,stringsAsFactors=F))
+  test_data.m <- melt(cbind.data.frame('gene'=rownames(exp_data2),exp_data2,stringsAsFactors=F),id.vars = 'gene')
   p <- ggplot(test_data.m, aes(variable, gene)) + geom_tile(aes(fill = value), colour = "white") +
     scale_fill_gradient(low = "darkgreen",high = "red",na.value = "white",
                         limits=c(exp_lengend_low, exp_lengend_high),
