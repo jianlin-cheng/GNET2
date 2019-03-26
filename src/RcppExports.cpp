@@ -5,57 +5,6 @@
 
 using namespace Rcpp;
 
-// pearsoncoeff
-double pearsoncoeff(NumericVector X, NumericVector Y);
-RcppExport SEXP _GNET2_pearsoncoeff(SEXP XSEXP, SEXP YSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type X(XSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type Y(YSEXP);
-    rcpp_result_gen = Rcpp::wrap(pearsoncoeff(X, Y));
-    return rcpp_result_gen;
-END_RCPP
-}
-// rowwise_avg_cor
-double rowwise_avg_cor(NumericMatrix Y, LogicalVector row_slt);
-RcppExport SEXP _GNET2_rowwise_avg_cor(SEXP YSEXP, SEXP row_sltSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type Y(YSEXP);
-    Rcpp::traits::input_parameter< LogicalVector >::type row_slt(row_sltSEXP);
-    rcpp_result_gen = Rcpp::wrap(rowwise_avg_cor(Y, row_slt));
-    return rcpp_result_gen;
-END_RCPP
-}
-// update_score
-double update_score(NumericMatrix X, LogicalVector left_idx_bool, LogicalVector right_idx_bool);
-RcppExport SEXP _GNET2_update_score(SEXP XSEXP, SEXP left_idx_boolSEXP, SEXP right_idx_boolSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type X(XSEXP);
-    Rcpp::traits::input_parameter< LogicalVector >::type left_idx_bool(left_idx_boolSEXP);
-    Rcpp::traits::input_parameter< LogicalVector >::type right_idx_bool(right_idx_boolSEXP);
-    rcpp_result_gen = Rcpp::wrap(update_score(X, left_idx_bool, right_idx_bool));
-    return rcpp_result_gen;
-END_RCPP
-}
-// find_new_split
-IntegerVector find_new_split(NumericMatrix X, NumericMatrix Y, IntegerVector groups, LogicalVector feature_remaining);
-RcppExport SEXP _GNET2_find_new_split(SEXP XSEXP, SEXP YSEXP, SEXP groupsSEXP, SEXP feature_remainingSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type X(XSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type Y(YSEXP);
-    Rcpp::traits::input_parameter< IntegerVector >::type groups(groupsSEXP);
-    Rcpp::traits::input_parameter< LogicalVector >::type feature_remaining(feature_remainingSEXP);
-    rcpp_result_gen = Rcpp::wrap(find_new_split(X, Y, groups, feature_remaining));
-    return rcpp_result_gen;
-END_RCPP
-}
 // build_regression_tree_baysian
 NumericMatrix build_regression_tree_baysian(NumericMatrix X, NumericMatrix Y, int max_partition_level, double cor_cutoff, int min_divide_size);
 RcppExport SEXP _GNET2_build_regression_tree_baysian(SEXP XSEXP, SEXP YSEXP, SEXP max_partition_levelSEXP, SEXP cor_cutoffSEXP, SEXP min_divide_sizeSEXP) {
@@ -73,10 +22,6 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_GNET2_pearsoncoeff", (DL_FUNC) &_GNET2_pearsoncoeff, 2},
-    {"_GNET2_rowwise_avg_cor", (DL_FUNC) &_GNET2_rowwise_avg_cor, 2},
-    {"_GNET2_update_score", (DL_FUNC) &_GNET2_update_score, 3},
-    {"_GNET2_find_new_split", (DL_FUNC) &_GNET2_find_new_split, 4},
     {"_GNET2_build_regression_tree_baysian", (DL_FUNC) &_GNET2_build_regression_tree_baysian, 5},
     {NULL, NULL, 0}
 };

@@ -1,9 +1,3 @@
-library(reshape2)
-library(ggplot2)
-library(scales)
-library(grid)
-library(Rcpp)
-
 calc_likelihood_score = function(x,labels){
   score_total = 0
   for(i in unique(labels)){
