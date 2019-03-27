@@ -9,9 +9,9 @@ gnet(input, reg_names, init_group_num = 20, max_partition_level = 4,
   max_iter = 5)
 }
 \arguments{
-\item{input}{A p by n matrix of expression data of p genes and n samples, for example log2 RPKM from RNA-Seq.}
+\item{input}{A SummarizedExperiment object, or a p by n matrix of expression data of p genes and n samples, for example log2 RPKM from RNA-Seq.}
 
-\item{reg_names}{A list of name of potential upstream regulators such as transcription factors.}
+\item{reg_names}{A list of potential upstream regulators names, for example a list of known transcription factors.}
 
 \item{init_group_num}{Initial number of function clusters used by the algorithm.}
 
@@ -33,12 +33,10 @@ Build regulation modules by iteratively perform TF assigning and Gene assigning,
 }
 \examples{
 set.seed(1)
-gene_num = 1000
-tf_num = 100
-input <- matrix(rnorm(gene_num*12),gene_num,12)
-tf_list <- paste0('TF',1:tf_num)
-rownames(input) <- c(tf_list,paste0('gene',1:(nrow(input)-length(tf_list))))
-colnames(input) <- paste0('sample_',1:ncol(input))
-gnet_result = gnet(input,tf_list,init_group_num,max_partition_level,
-cor_cutoff,min_divide_size,min_group_size,max_iter,min_group_num)
+exp_data <- matrix(rnorm(1000*12),1000,12)
+tf_list <- paste0('TF',1:100)
+rownames(exp_data) <- c(tf_list,paste0('gene',1:(nrow(exp_data)-length(tf_list))))
+colnames(exp_data) <- paste0('condition_',1:ncol(exp_data))
+se <- SummarizedExperiment(assays=list(counts=exp_data))
+gnet_result <- gnet(se,tf_list,init_group_num,max_partition_level,cor_cutoff,min_divide_size,min_group_size,max_iter)
 }
