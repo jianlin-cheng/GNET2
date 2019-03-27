@@ -38,22 +38,22 @@ We first generate random expression data and a list of regulator gene names.
 The input is typically a p by n matrix of expression data of p genes and n samples, for example log2 RPKM from RNA-Seq.
 
 ```
+library(SummarizedExperiment)
 set.seed(1)
 gene_num = 1000
 tf_num = 100
-rnaseq_data <- matrix(rnorm(gene_num*12),gene_num,12)
+exp_data <- matrix(rnorm(gene_num*12),gene_num,12)
 tf_list <- paste0('TF',1:tf_num)
-rownames(rnaseq_data) <- c(tf_list,paste0('gene',1:(nrow(rnaseq_data)-length(tf_list))))
-colnames(rnaseq_data) <- paste0('sample_',1:ncol(rnaseq_data))
-
-head(rnaseq_data)
+rownames(exp_data) <- c(tf_list,paste0('gene',1:(nrow(exp_data)-length(tf_list))))
+colnames(exp_data) <- paste0('sample_',1:ncol(exp_data))
+se <- SummarizedExperiment(assays=list(counts=exp_data))
 ```
 
 
 The module construction process make take a few time, depending on the size of data and maximum iterations allowed.
 
 ```
-gnet_result = gnet(rnaseq_data,tf_list)
+gnet_result = gnet(se,tf_list)
 ```
 
 Plot the tree of the first group
