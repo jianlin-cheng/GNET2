@@ -14,7 +14,7 @@ Depends:
     R (>= 3.5),
     SummarizedExperiment (>= 1.1.6)
 Imports:
-    ggplot2,reshape2,grid,DiagrammeR,Rcpp,methods
+    ggplot2,reshape2,grid,DiagrammeR,Rcpp,methods,stats,graphics
 RoxygenNote: 6.1.1
 Suggests: 
     knitr,
