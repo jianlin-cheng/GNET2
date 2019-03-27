@@ -2,8 +2,8 @@ import(Rcpp)
 import('DiagrammeR')
 import('ggplot2')
 import('grid')
-importFrom('SummarizedExperiment','SummarizedExperiment','assay')
 
+importFrom('SummarizedExperiment','SummarizedExperiment','assay')
 importFrom('reshape2','melt')
 useDynLib(GNET2)
 
