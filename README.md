@@ -53,7 +53,7 @@ se <- SummarizedExperiment(assays=list(counts=exp_data))
 The module construction process make take a few time, depending on the size of data and maximum iterations allowed.
 
 ```
-gnet_result = gnet(se,tf_list)
+gnet_result <- gnet(se,tf_list)
 ```
 
 Plot the tree of the first group
