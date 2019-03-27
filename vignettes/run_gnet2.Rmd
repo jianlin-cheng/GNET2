@@ -83,6 +83,6 @@ print(group_above_kn)
 
 The group indices in group_above_kn can been seen as a list of indices of the data point with correlation higher than the knee point, and you may consider use them only for further analysis.
 
-```{r}
-SessionInfo()
+```{r, echo=TRUE}
+sessionInfo()
 ```
