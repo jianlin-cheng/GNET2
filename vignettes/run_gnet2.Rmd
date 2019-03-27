@@ -16,8 +16,18 @@ knitr::opts_chunk$set(
 )
 ```
 
+# Introduction
 GNET2 is a R package used for build regulator network and cluster genes to functional groups with E-M process.
 It iteratively perform TF assigning and Gene assigning, until the assignment of genes did not change, or max number of iterations is reached.
+
+# Installation
+To install, open R and type:
+```
+install.packages("devtools")
+library("devtools")
+install_github("chrischen1/GNET2")
+```
+
 
 ```{r load_packages, message=FALSE, warning=FALSE, include=FALSE}
 library(GNET2)
@@ -73,3 +83,6 @@ print(group_above_kn)
 
 The group indices in group_above_kn can been seen as a list of indices of the data point with correlation higher than the knee point, and you may consider use them only for further analysis.
 
+```{r}
+SessionInfo()
+```

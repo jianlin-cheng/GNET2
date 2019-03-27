@@ -11,7 +11,7 @@ calc_likelihood_score = function(x,labels){
   for(i in unique(labels)){
     if(sum(labels==i) >1){
       x_i = x[labels==i,]
-      for(j in 1:ncol(x_i)){
+      for(j in seq_len(ncol(x_i))){
         x_i_j = x_i[,j]
         score_total = score_total+sum(dnorm(x_i_j,mean = mean(x_i_j),sd = sd(x_i_j),log = T))
       }
@@ -67,7 +67,7 @@ get_leaf_labels = function(group_table,format_plot=F){
   }
   leaf_label = rep(0,ncol(group_table))
   next_label = 0
-  for(i in 1:nrow(group_table)){
+  for(i in seq_len(nrow(group_table))){
     current_label = group_table[i,]
     for(j in 0:1){
       leaf_label[current_label==j] = next_label
@@ -89,7 +89,7 @@ get_leaf_labels = function(group_table,format_plot=F){
 #' build_moduleR(X = matrix(rnorm(50*100),50,100), Y = matrix(rnorm(50*200),50,200))
 #' @export
 build_moduleR = function(X,Y,max_partition_level,cor_cutoff,min_divide_size){
-  feature_remaining = 1:ncol(X)
+  feature_remaining = seq_len(ncol(X))
   feature_num = 0
   subgroup_indicator = rep(0,nrow(X))
   groups = c(0)
@@ -179,7 +179,7 @@ assign_tfR = function(regulator_data,gene_data,gene_group_table,reg_names,
 
 assign_gene = function(gene_data,reg_group_table){
   gene_group_table = rep(-1,nrow(gene_data))
-  for(gene_idx in 1:nrow(gene_data)){
+  for(gene_idx in seq_len(nrow(gene_data))){
     exp_gene = as.numeric(gene_data[gene_idx,])
     gene_group_table[gene_idx] = which.max(
       apply(reg_group_table, 1, function(x)calc_likelihood_vec(exp_gene,x)))-1
@@ -199,12 +199,12 @@ assign_gene = function(gene_data,reg_group_table){
 kneepointDetection <-function (vect) {
   n <- length(vect)
   Vect <- vect
-  a <- as.data.frame(cbind(1:n, Vect[1:n]))
+  a <- as.data.frame(cbind(seq_len(n), Vect[seq_len(n)]))
   l <- lm(a[, 2] ~ a[, 1], data = a)
   MinError = 1e+08
   MinIndex = 1
   for (i in 2:(n - 2)) {
-    a <- as.data.frame(cbind(1:i, Vect[1:i]))
+    a <- as.data.frame(cbind(seq_len(i), Vect[seq_len(i)]))
     l1 <- lm(a[, 2] ~ a[, 1], data = a)
     e1 <- sum(abs(1 - a[, 2]))
     a <- as.data.frame(cbind((i + 1):n, Vect[(i + 1):n]))
@@ -233,16 +233,16 @@ run_gnet = function(gene_data,regulator_data,init_group_num = 5,max_partition_le
       o = order(avg_cor_list,decreasing = T)
       y = avg_cor_list[o]
       kn = kneepointDetection(y)
-      groups_keep = o[1:max(kn,min_group_num)]
+      groups_keep = o[seq_len(max(kn,min_group_num))]
     }else{
-      groups_keep = 1:length(avg_cor_list)
+      groups_keep = seq_len(length(avg_cor_list))
     }
     gene_group_table[!(gene_group_table %in% groups_keep)] <- -1
   }
 
 
   message('Building module networks')
-  for (i in 1:max_iter) {
+  for (i in seq_len(max_iter)) {
     message(paste('iteration',i))
     assign_reg_names = assign_tf(regulator_data,gene_data,gene_group_table,reg_names,
                                        min_group_size,max_partition_level,cor_cutoff,min_divide_size)
@@ -260,7 +260,7 @@ run_gnet = function(gene_data,regulator_data,init_group_num = 5,max_partition_le
 
   gene_list_all = NULL
   groups_unique = unique(gene_group_table)
-  for (i in 1:length(groups_unique)) {
+  for (i in seq_len(length(groups_unique))) {
     gene_list_all = rbind(gene_list_all,
                            cbind.data.frame('gene'=rownames(gene_data)[gene_group_table==groups_unique[i]],
                                             'group'=i-1,stringsAsFactors=F))
@@ -281,11 +281,11 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
     print(plots[[1]])
 
   } else {
-    grid::grid.newpage()
-    grid::pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
 
     # Make each plot, in the correct location
-    for (i in 1:numPlots) {
+    for (i in seq_len(numPlots)) {
       # Get the i,j matrix positions of the regions that contain this subplot
       matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
 
@@ -309,7 +309,7 @@ plot_tree <- function(gnet_result,group_idx){
   gene_group_table = gnet_result$gene_group_table
   tree_i = reg_group_table[reg_group_table[,1]==group_idx,]
   label_list = c()
-  for(i in 1:nrow(tree_i)){
+  for(i in seq_len(nrow(tree_i))){
     coverage_i = sum(tree_i[i,3:ncol(tree_i)]>=0)
     feature_name_i = rownames(regulator_data)[tree_i[i,2]+1]
     split_i = round(max(regulator_data[feature_name_i,tree_i[i,3:ncol(tree_i)]==0]),4)
@@ -317,7 +317,7 @@ plot_tree <- function(gnet_result,group_idx){
   }
   leaf_idx = 0
   from_list <- to_list <- edge_labels <- c()
-  for(i in 1:(nrow(tree_i)-1)){
+  for(i in seq_len((nrow(tree_i)-1))){
     for(j in 0:1){
       found_node = F
       split_i_j = tree_i[i,3:ncol(tree_i)]==j
@@ -376,13 +376,13 @@ plot_gene_group <- function(gnet_result,group_idx){
   regulator_data2 <- regulator_data1[,row_order]
   exp_data2 <- exp_data1[,row_order]
   test_regulators_names <- rownames(regulator_data2)
-  layout=matrix(c(1:length(test_regulators_names),rep(length(test_regulators_names)+1,
+  layout=matrix(c(seq_len(length(test_regulators_names)),rep(length(test_regulators_names)+1,
                                                       length(test_regulators_names)*2)),ncol=1)
   regulators_plist <- list()
   scaleFUN <- function(x) sprintf("%.3f", x)
 
   # add TF bars
-  for(i in 1:length(test_regulators_names)){
+  for(i in seq_len(length(test_regulators_names))){
     reg_data_mask <- group_table2[i,]==-1
     exp_val <- as.numeric(regulator_data2[i,])
     exp_val[reg_data_mask] <- NA
@@ -390,14 +390,14 @@ plot_gene_group <- function(gnet_result,group_idx){
     lengend_high <- max(exp_val,na.rm = T)
     exp_val1 <- rbind.data.frame(matrix(NA,nrow = 1,ncol = length(exp_val)),exp_val,stringsAsFactors=F)
 
-    rownames(exp_val1) <- 1:nrow(exp_val1)
-    exp_val.m <- reshape2::melt(exp_val1,id.vars = NULL)
-    exp_val.m <- cbind.data.frame('y_idx'=rep(1:nrow(exp_val1),ncol(exp_val1)),exp_val.m,stringsAsFactors=F)
+    rownames(exp_val1) <- seq_len(nrow(exp_val1))
+    exp_val.m <- melt(exp_val1,id.vars = NULL)
+    exp_val.m <- cbind.data.frame('y_idx'=rep(seq_len(nrow(exp_val1)),ncol(exp_val1)),exp_val.m,stringsAsFactors=F)
     exp_label = rep('',ncol(exp_val1))
     exp_label[group_table2[i,]==0] <- 'Low'
     exp_label[group_table2[i,]==1] <- 'High'
 
-    p <- ggplot2::ggplot(exp_val.m, aes(variable, y_idx)) + geom_tile(aes(fill = value), colour = "white") +
+    p <- ggplot(exp_val.m, aes(variable, y_idx)) + geom_tile(aes(fill = value), colour = "white") +
       scale_x_discrete(labels=exp_label)+
       scale_fill_gradient(low = "darkgreen",high = "red",na.value = "white",
                           limits=c(lengend_low, lengend_high),
@@ -416,8 +416,8 @@ plot_gene_group <- function(gnet_result,group_idx){
   # add heatmap
   exp_lengend_low <- min(exp_data2)
   exp_lengend_high <- max(exp_data2)
-  test_data.m <- reshape2::melt(cbind.data.frame('gene'=rownames(exp_data2),exp_data2,stringsAsFactors=F),id.vars = 'gene')
-  p <- ggplot2::ggplot(test_data.m, aes(variable, gene)) + geom_tile(aes(fill = value), colour = "white") +
+  test_data.m <- melt(cbind.data.frame('gene'=rownames(exp_data2),exp_data2,stringsAsFactors=F),id.vars = 'gene')
+  p <- ggplot(test_data.m, aes(variable, gene)) + geom_tile(aes(fill = value), colour = "white") +
     scale_fill_gradient(low = "darkgreen",high = "red",na.value = "white",
                         limits=c(exp_lengend_low, exp_lengend_high),
                         breaks=seq(exp_lengend_low,exp_lengend_high,length.out = 4),labels=scaleFUN)+
@@ -443,11 +443,11 @@ plot_group_correlation <- function(gnet_result){
   avg_cor_list2 <- sort(avg_cor_list,decreasing = T)
 
   kp <- kneepointDetection(avg_cor_list2)
-  plot(1:length(avg_cor_list2),avg_cor_list2,col=c(rep(3,kp),rep(2,length(avg_cor_list2)-kp)),
+  plot(seq_len(length(avg_cor_list2)),avg_cor_list2,col=c(rep(3,kp),rep(2,length(avg_cor_list2)-kp)),
        pch=1,cex =0.6,xlab='Cluster number',ylab='Average correlation',main='Cluster number vs. Average correlation')
 
-  k1 <- avg_cor_list2[1:(kp)]
-  k2 <- 1:kp
+  k1 <- avg_cor_list2[seq_len(kp)]
+  k2 <- seq_len(kp)
   if(kp>1){
     f1 <- lm(k1 ~ k2)
     lines(x=k2, y=predict(f1, newdata=data.frame(x=k2)),col=3,lwd=2)
@@ -495,7 +495,7 @@ gnet <- function(input,reg_names,init_group_num = 20,max_partition_level = 4,
   reg_group_table = result_all[[1]]
   gene_group_table = result_all[[2]]
   avg_cor_list <- rep(0,length(unique(gene_group_table$group)))
-  for(i in 1:length(avg_cor_list)){
+  for(i in seq_len(length(avg_cor_list))){
     cor_m <- cor(t(gene_data[gene_group_table$group==(i-1),]))
     avg_cor_list[i] <- mean(cor_m[upper.tri(cor_m)])
   }

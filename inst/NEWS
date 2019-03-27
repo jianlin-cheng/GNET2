@@ -1,0 +1,10 @@
+GNET2 0.1.0:
+
+The GNET matlab package was first released in 2013 and described in the publication:
+
+Mingzhu Zhu, Jeremy L Dahmen, Gary Stacey and Jianlin Cheng. 
+Predicting gene regulatory networks of soybean nodulation from RNA-Seq transcriptome data.
+BMC Bioinformatics, 2013;14(1):278.
+https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-14-278
+
+It was an independently released R package by the Chen Chen in Jianlin Cheng Lab, which is rewritten in C++ with R interface.
