@@ -38,6 +38,7 @@ We first generate random expression data and a list of regulator gene names.
 The input is typically a p by n matrix of expression data of p genes and n samples, for example log2 RPKM from RNA-Seq.
 
 ```{r,echo = TRUE}
+library(SummarizedExperiment)
 set.seed(1)
 gene_num = 1000
 tf_num = 100
