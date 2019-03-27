@@ -2,7 +2,7 @@
 % Please edit documentation in R/gnet_r.R
 \name{get_correlation_list}
 \alias{get_correlation_list}
-\title{Calculate Pearson correlation coefficient within each group.}
+\title{Calculate correlation within each group.}
 \usage{
 get_correlation_list(x, labels)
 }

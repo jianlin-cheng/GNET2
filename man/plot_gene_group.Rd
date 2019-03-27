@@ -2,7 +2,7 @@
 % Please edit documentation in R/gnet_r.R
 \name{plot_gene_group}
 \alias{plot_gene_group}
-\title{Plot the regulators module and heatmap of the expression inferred downstream genes for each sample. It can be interpreted as two parts: the bars at the top shows how samples are splited by the regression tree and the heatmap at the bottom shows how downstream genes are regulated by each subgroup determined by the regulators.}
+\title{Plot a module}
 \usage{
 plot_gene_group(gnet_result, group_idx)
 }

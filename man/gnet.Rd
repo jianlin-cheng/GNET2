@@ -2,13 +2,15 @@
 % Please edit documentation in R/gnet_r.R
 \name{gnet}
 \alias{gnet}
-\title{Build regulation modules by iteratively perform TF assigning and Gene assigning, until the assignment of genes did not change, or max number of iterations reached}
+\title{Run GNET2}
 \usage{
-gnet(rnaseq_data, reg_names, init_group_num = 8,
-  max_partition_level = 3, cor_cutoff = 0.9, min_divide_size = 3,
-  min_group_size = 2, max_iter = 5)
+gnet(input, reg_names, init_group_num = 20, max_partition_level = 4,
+  cor_cutoff = 0.9, min_divide_size = 3, min_group_size = 2,
+  max_iter = 5)
 }
 \arguments{
+\item{input}{A p by n matrix of expression data of p genes and n samples, for example log2 RPKM from RNA-Seq.}
+
 \item{reg_names}{A list of name of potential upstream regulators such as transcription factors.}
 
 \item{init_group_num}{Initial number of function clusters used by the algorithm.}
@@ -21,24 +23,22 @@ gnet(rnaseq_data, reg_names, init_group_num = 8,
 
 \item{max_iter}{Maxumum number of iterations allowed if not converged.}
 
-\item{gene_data}{A p by n matrix of expression data of p genes and n samples, for example log2 RPKM from RNA-Seq.}
-
 \item{min_divide_size}{Minimum number of genes allowed in a group.}
 }
 \value{
 A list of expression data of genes, expression data of regulators, within group score, table of tree structure and final assigned group of each gene.
 }
 \description{
-Build regulation modules by iteratively perform TF assigning and Gene assigning, until the assignment of genes did not change, or max number of iterations reached
+Build regulation modules by iteratively perform TF assigning and Gene assigning, until the assignment of genes did not change, or max number of iterations reached.
 }
 \examples{
 set.seed(1)
 gene_num = 1000
 tf_num = 100
-rnaseq_data <- matrix(rnorm(gene_num*12),gene_num,12)
+input <- matrix(rnorm(gene_num*12),gene_num,12)
 tf_list <- paste0('TF',1:tf_num)
-rownames(rnaseq_data) <- c(tf_list,paste0('gene',1:(nrow(rnaseq_data)-length(tf_list))))
-colnames(rnaseq_data) <- paste0('sample_',1:ncol(rnaseq_data))
-gnet_result = gnet(rnaseq_data,tf_list,init_group_num,max_partition_level,
+rownames(input) <- c(tf_list,paste0('gene',1:(nrow(input)-length(tf_list))))
+colnames(input) <- paste0('sample_',1:ncol(input))
+gnet_result = gnet(input,tf_list,init_group_num,max_partition_level,
 cor_cutoff,min_divide_size,min_group_size,max_iter,min_group_num)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/gnet_r.R
 \name{plot_tree}
 \alias{plot_tree}
-\title{Plot the regression tree given the index of a module.}
+\title{Plot the regression tree.}
 \usage{
 plot_tree(gnet_result, group_idx)
 }

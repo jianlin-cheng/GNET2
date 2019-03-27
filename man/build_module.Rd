@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{build_module}
 \alias{build_module}
-\title{Fit a regression tree based on Gaussian Likelihood score.}
+\title{Fit a regression tree.}
 \usage{
 build_module(X, Y, max_partition_level, cor_cutoff, min_divide_size)
 }
