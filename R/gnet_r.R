@@ -40,8 +40,9 @@ calc_correlation = function(x){
   }
 }
 
-#' Calculate Pearson correlation coefficient within each group.
+#' Calculate correlation within each group.
 #' 
+#' Calculate Pearson correlation coefficient within each group.
 #' @param x A n by p matrix.
 #' @param labels A vector of length n, indicating the group of rows.
 #' @return An array of Pearson correlation coefficient for each row, rows belong to the same group have same values.
@@ -76,8 +77,9 @@ get_leaf_labels = function(group_table,format_plot=F){
   return(leaf_label)
 }
 
-#' R version of build regression tree based on Gaussian Likelihood score. Runs slower than the build_module() which is C++ version but gives flexibility of customization of R functions.
-#' 
+#' R code version of build regression tree.
+#'
+#'  R version of build regression tree based on Gaussian Likelihood score. Runs slower than the build_module() which is C++ version but gives flexibility of customization of R functions.
 #' @param max_partition_level Maximum partition level in the tree.
 #' @param cor_cutoff Cutoff for within group Pearson correlation coefficient, if all data belong to a node have average correlation greater or equal to this, the node would not split anymore.
 #' @param min_divide_size Minimum number of data belong to a node allowed for further split of the node.
@@ -185,8 +187,9 @@ assign_gene = function(gene_data,reg_group_table){
   return(gene_group_table)
 }
 
-#' Detect the knee point of the array.
+#' Knee point detection.
 #' 
+#' Detect the knee point of the array.
 #' @param vect A list of sorted numbers.
 #' 
 #' @return The index of the data point which is the knee.
@@ -292,8 +295,9 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
   }
 }
 
-#' Plot the regression tree given the index of a module.
+#' Plot the regression tree.
 #' 
+#' Plot the regression tree given the index of a module.
 #' @param gnet_result Results returned by gnet().
 #' @param group_idx Index of the module..
 #' 
@@ -350,8 +354,9 @@ plot_tree <- function(gnet_result,group_idx){
   render_graph(graph)
 }
 
-#' Plot the regulators module and heatmap of the expression inferred downstream genes for each sample. It can be interpreted as two parts: the bars at the top shows how samples are splited by the regression tree and the heatmap at the bottom shows how downstream genes are regulated by each subgroup determined by the regulators.
+#' Plot a module
 #' 
+#' Plot the regulators module and heatmap of the expression inferred downstream genes for each sample. It can be interpreted as two parts: the bars at the top shows how samples are splited by the regression tree and the heatmap at the bottom shows how downstream genes are regulated by each subgroup determined by the regulators.
 #' @param gnet_result Results returned by gnet().
 #' @param group_idx Index of the module..
 #' 
@@ -426,8 +431,9 @@ plot_gene_group <- function(gnet_result,group_idx){
   multiplot(plotlist = regulators_plist,cols = 1,layout = layout)
 }
 
-#' Plot the correlation of each group and auto detected knee point. It can be used to determined which clustered are kept for further analysis.
+#' Plot the correlation of each group
 #' 
+#' Plot the correlation of each group and auto detected knee point. It can be used to determined which clustered are kept for further analysis.
 #' @param avg_cor_list The average within group Pearson correlation coefficient of each group from gnet().
 #' 
 #' @return A list of indices of the data point with correlation higher than the knee point.
@@ -455,8 +461,9 @@ plot_group_correlation <- function(gnet_result){
   return(which(avg_cor_list >= avg_cor_list2[kp]))
 }
 
-#' Build regulation modules by iteratively perform TF assigning and Gene assigning, until the assignment of genes did not change, or max number of iterations reached
+#' Run GNET2
 #' 
+#' Build regulation modules by iteratively perform TF assigning and Gene assigning, until the assignment of genes did not change, or max number of iterations reached.
 #' @param input A p by n matrix of expression data of p genes and n samples, for example log2 RPKM from RNA-Seq.
 #' @param reg_names A list of name of potential upstream regulators such as transcription factors.
 #' @param init_group_num Initial number of function clusters used by the algorithm.

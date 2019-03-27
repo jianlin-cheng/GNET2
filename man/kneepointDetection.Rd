@@ -2,7 +2,7 @@
 % Please edit documentation in R/gnet_r.R
 \name{kneepointDetection}
 \alias{kneepointDetection}
-\title{Detect the knee point of the array.}
+\title{Knee point detection.}
 \usage{
 kneepointDetection(vect)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/gnet_r.R
 \name{build_moduleR}
 \alias{build_moduleR}
-\title{R version of build regression tree based on Gaussian Likelihood score. Runs slower than the build_module() which is C++ version but gives flexibility of customization of R functions.}
+\title{R code version of build regression tree.}
 \usage{
 build_moduleR(X, Y, max_partition_level, cor_cutoff, min_divide_size)
 }

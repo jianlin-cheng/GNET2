@@ -19,17 +19,10 @@ knitr::opts_chunk$set(
 GNET2 is a R package used for build regulator network and cluster genes to functional groups with E-M process.
 It iteratively perform TF assigning and Gene assigning, until the assignment of genes did not change, or max number of iterations is reached.
 
-## Install GNET2
-
-```{r,echo = TRUE, include = TRUE,warning=FALSE}
-library(devtools)
-install_github("chrischen1/GNET2")
-
+```{r load_packages, message=FALSE, warning=FALSE, include=FALSE}
 library(GNET2)
 ```
 
-
-## Run GNET2
 
 We first generate random expression data and a list of regulator gene names. 
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/gnet_r.R
 \name{plot_group_correlation}
 \alias{plot_group_correlation}
-\title{Plot the correlation of each group and auto detected knee point. It can be used to determined which clustered are kept for further analysis.}
+\title{Plot the correlation of each group}
 \usage{
 plot_group_correlation(gnet_result)
 }

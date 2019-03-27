@@ -87,8 +87,9 @@ IntegerVector find_new_split(NumericMatrix X, NumericMatrix Y,IntegerVector grou
   return new_group_table_row;
 }
 
+//' Fit a regression tree.
+//' 
 //' Fit a regression tree based on Gaussian Likelihood score.
-//'
 //' @param X A n by p matrix as input.
 //' @param Y A n by q matrix as response.
 //' @param max_partition_level Maximum partition level in the tree.
