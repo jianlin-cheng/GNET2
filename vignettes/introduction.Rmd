@@ -9,7 +9,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include = FALSE}
+```{r setup,echo = FALSE, include = TRUE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
@@ -21,9 +21,11 @@ It iteratively perform TF assigning and Gene assigning, until the assignment of 
 
 ## Install GNET2
 
-```{r, fig.show='hold'}
+```{r,echo = TRUE, include = TRUE,warning=FALSE}
 library(devtools)
 install_github("chrischen1/GNET2")
+
+library(GNET2)
 ```
 
 
@@ -33,7 +35,7 @@ We first generate random expression data and a list of regulator gene names.
 
 The input is typically a p by n matrix of expression data of p genes and n samples, for example log2 RPKM from RNA-Seq.
 
-```{r, echo=FALSE, results='asis'}
+```{r,echo = TRUE}
 set.seed(1)
 gene_num = 1000
 tf_num = 100
@@ -41,18 +43,20 @@ rnaseq_data <- matrix(rnorm(gene_num*12),gene_num,12)
 tf_list <- paste0('TF',1:tf_num)
 rownames(rnaseq_data) <- c(tf_list,paste0('gene',1:(nrow(rnaseq_data)-length(tf_list))))
 colnames(rnaseq_data) <- paste0('sample_',1:ncol(rnaseq_data))
+
+head(rnaseq_data)
 ```
 
 
 The module construction process make take a few time, depending on the size of data and maximum iterations allowed.
 
-```{r, echo=FALSE, results='asis'}
+```{r, echo=TRUE}
 gnet_result = gnet(rnaseq_data,tf_list)
 ```
 
 Plot the tree of the first group
 
-```{r, echo=FALSE, results='asis'}
+```{r, echo=TRUE,fig.width=10, fig.height=12}
 plot_gene_group(gnet_result,group_idx = 11)
 ```
 
@@ -62,14 +66,14 @@ the bars at the top shows how samples are splited by the regression
 tree and the heatmap at the bottom shows how downstream genes are
 regulated by each subgroup determined by the regulators.
 
-```{r, echo=FALSE, results='asis'}
+```{r, echo=TRUE,fig.width=8, fig.height=8}
 plot_tree(gnet_result,group_idx = 0)
 ```
 
 
 Plot the correlation of each group and auto detected knee point.
 
-```{r, echo=FALSE, results='asis'}
+```{r, echo=TRUE,fig.width=8, fig.height=8}
 group_above_kn <- plot_group_correlation(gnet_result)
 print(group_above_kn)
 ```
