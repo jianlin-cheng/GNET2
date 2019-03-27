@@ -13,7 +13,7 @@ calc_likelihood_score <- function(x,labels){
       x_i <- x[labels==i,]
       for(j in seq_len(ncol(x_i))){
         x_i_j <- x_i[,j]
-        score_total <- score_total+sum(stats::dnorm(x_i_j,mean = mean(x_i_j),sd = stats::sd(x_i_j),log = TRUE))
+        score_total <- score_total+sum(dnorm(x_i_j,mean = mean(x_i_j),sd = sd(x_i_j),log = TRUE))
       }
     }
   }
@@ -25,7 +25,7 @@ calc_likelihood_vec <- function(x,labels){
   for(i in unique(labels)){
     if(sum(labels==i) >1){
       x_i <- x[labels==i]
-      score_total <- score_total+sum(stats::dnorm(x_i,mean = mean(x_i),sd = stats::sd(x_i),log = TRUE))
+      score_total <- score_total+sum(dnorm(x_i,mean = mean(x_i),sd = sd(x_i),log = TRUE))
     }
   }
   return(score_total)
@@ -35,7 +35,7 @@ calc_correlation <- function(x){
   if(nrow(x)<2 | ncol(x)<2){
     return(0)
   }else{
-    x_cor <- stats::cor(x)
+    x_cor <- cor(x)
     return(mean(abs(x_cor[upper.tri(x_cor)])))
   }
 }
@@ -80,13 +80,17 @@ get_leaf_labels <- function(group_table,format_plot=FALSE){
 #' R code version of build regression tree.
 #'
 #'  R version of build regression tree based on Gaussian Likelihood score. Runs slower than the build_module() which is C++ version but gives flexibility of customization of R functions.
+#' @param X A n by p matrix as input.
+#' @param Y A n by q matrix as response.
 #' @param max_partition_level Maximum partition level in the tree.
 #' @param cor_cutoff Cutoff for within group Pearson correlation coefficient, if all data belong to a node have average correlation greater or equal to this, the node would not split anymore.
 #' @param min_divide_size Minimum number of data belong to a node allowed for further split of the node.
 #' 
-#' @return A matrix for sample informatrion for each partition level. First column is feature index used by the node and second is the value used to split, the rest of the columns are the split of sample: 0 means less or equal, 1 means greater and -1 means the sample does not belong to this node.
+#' @return A matrix for sample informatrion for each partition level. First column is feature index used by the node and second is the value used to split, 
+#' the rest of the columns are the split of sample: 0 means less or equal, 1 means greater and -1 means the sample does not belong to this node.
 #' @examples
-#' build_moduleR(X = matrix(rnorm(50*100),50,100), Y = matrix(rnorm(50*200),50,200))
+#' build_moduleR(X = matrix(rnorm(10*10),10,10), Y = matrix(rnorm(10*10),10,10),
+#'               max_partition_level=2,cor_cutoff=0.9,min_divide_size=3)
 #' @export
 build_moduleR <- function(X,Y,max_partition_level,cor_cutoff,min_divide_size){
   feature_remaining <- seq_len(ncol(X))
@@ -200,15 +204,15 @@ kneepointDetection <-function (vect) {
   n <- length(vect)
   Vect <- vect
   a <- as.data.frame(cbind(seq_len(n), Vect[seq_len(n)]))
-  l <- stats::lm(a[, 2] ~ a[, 1], data = a)
+  l <- lm(a[, 2] ~ a[, 1], data = a)
   MinError <- 1e+08
   MinIndex <- 1
   for (i in 2:(n - 2)) {
     a <- as.data.frame(cbind(seq_len(i), Vect[seq_len(i)]))
-    l1 <- stats::lm(a[, 2] ~ a[, 1], data = a)
+    l1 <- lm(a[, 2] ~ a[, 1], data = a)
     e1 <- sum(abs(1 - a[, 2]))
     a <- as.data.frame(cbind((i + 1):n, Vect[(i + 1):n]))
-    l <- stats::lm(a[, 2] ~ a[, 1], data = a)
+    l <- lm(a[, 2] ~ a[, 1], data = a)
     l2 <- l
     e2 <- sum(abs(l$residuals))
     Error <- e1 + e2
@@ -227,7 +231,7 @@ run_gnet <- function(gene_data,regulator_data,init_group_num = 5,max_partition_l
   reg_names <- rownames(regulator_data)
   avg_cor_list <- c()
   for(i in 2:min(init_group_num,nrow(gene_data)-1)){
-    gene_group_table <- as.numeric(stats::kmeans(gene_data,centers = i)$cluster)-1
+    gene_group_table <- as.numeric(kmeans(gene_data,centers = i)$cluster)-1
     avg_cor_list <- c(avg_cor_list,mean(get_correlation_list(t(gene_data),gene_group_table)))
     if(length(avg_cor_list)>=min_group_num){
       o <- order(avg_cor_list,decreasing = TRUE)
@@ -277,22 +281,22 @@ run_gnet <- function(gene_data,regulator_data,init_group_num = 5,max_partition_l
 #' @param max_partition_level max_partition_level Maximum partition level in the tree.
 #' @param cor_cutoff  Cutoff for within group Pearson correlation coefficient, if all data belong to a node have average correlation greater or equal to this, the node would not split anymore.
 #' @param min_divide_size Minimum number of data belong to a node allowed for further split of the node.
-#' @param min_divide_size Minimum number of genes allowed in a group.
+#' @param min_group_size Minimum number of genes allowed in a group.
 #' @param max_iter Maxumum number of iterations allowed if not converged.
 #' 
 #' @return A list of expression data of genes, expression data of regulators, within group score, table of tree structure and final assigned group of each gene.
 #' @examples
 #' set.seed(1)
-#' exp_data <- matrix(rnorm(1000*12),1000,12)
-#' tf_list <- paste0('TF',1:100)
+#' exp_data <- matrix(rnorm(100*12),100,12)
+#' tf_list <- paste0('TF',1:10)
 #' rownames(exp_data) <- c(tf_list,paste0('gene',1:(nrow(exp_data)-length(tf_list))))
 #' colnames(exp_data) <- paste0('condition_',1:ncol(exp_data))
 #' se <- SummarizedExperiment(assays=list(counts=exp_data))
-#' gnet_result <- gnet(se,tf_list,init_group_num,max_partition_level,cor_cutoff,min_divide_size,min_group_size,max_iter)
+#' gnet_result <- gnet(se,tf_list)
 #' @export
-gnet <- function(input,reg_names,init_group_num = 20,max_partition_level = 4,
+gnet <- function(input,reg_names,init_group_num = 4,max_partition_level = 3,
                  cor_cutoff = 0.9,min_divide_size = 3,min_group_size = 2,max_iter = 5){
-  if(methods::is(input,class2 = "SummarizedExperiment")){
+  if(is(input,class2 = "SummarizedExperiment")){
     input <- assay(input)
   }
   gene_data <- input[!rownames(input)%in%reg_names,]
@@ -303,7 +307,7 @@ gnet <- function(input,reg_names,init_group_num = 20,max_partition_level = 4,
   gene_group_table <- result_all[[2]]
   avg_cor_list <- rep(0,length(unique(gene_group_table$group)))
   for(i in seq_len(length(avg_cor_list))){
-    cor_m <- stats::cor(t(gene_data[gene_group_table$group==(i-1),]))
+    cor_m <- cor(t(gene_data[gene_group_table$group==(i-1),]))
     avg_cor_list[i] <- mean(cor_m[upper.tri(cor_m)])
   }
   return(list('gene_data' = gene_data,'regulator_data' = regulator_data,'group_score' = avg_cor_list,

@@ -24,5 +24,6 @@ A matrix for sample informatrion for each partition level. First column is featu
 Fit a regression tree based on Gaussian Likelihood score.
 }
 \examples{
-build_module(X = matrix(rnorm(50*100),50,100), Y = matrix(rnorm(50*200),50,200))
+build_module(X = matrix(rnorm(50*100),50,100), Y = matrix(rnorm(50*200),50,200),
+              max_partition_level=4,cor_cutoff=0.9,min_divide_size=3)
 }

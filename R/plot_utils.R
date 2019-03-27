@@ -31,6 +31,13 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 #' 
 #' @return None
 #' @examples
+#' set.seed(1)
+#' exp_data <- matrix(rnorm(100*12),100,12)
+#' tf_list <- paste0('TF',1:10)
+#' rownames(exp_data) <- c(tf_list,paste0('gene',1:(nrow(exp_data)-length(tf_list))))
+#' colnames(exp_data) <- paste0('condition_',1:ncol(exp_data))
+#' se <- SummarizedExperiment(assays=list(counts=exp_data))
+#' gnet_result <- gnet(se,tf_list)
 #' plot_tree(gnet_result,group_idx=0)
 #' @export
 plot_tree <- function(gnet_result,group_idx){
@@ -89,9 +96,16 @@ plot_tree <- function(gnet_result,group_idx){
 #' 
 #' Plot the regulators module and heatmap of the expression inferred downstream genes for each sample. It can be interpreted as two parts: the bars at the top shows how samples are splited by the regression tree and the heatmap at the bottom shows how downstream genes are regulated by each subgroup determined by the regulators.
 #' @param gnet_result Results returned by gnet().
-#' @param group_idx Index of the module..
+#' @param group_idx Index of the module.
 #' @return None
 #' @examples
+#' set.seed(1)
+#' exp_data <- matrix(rnorm(100*12),100,12)
+#' tf_list <- paste0('TF',1:10)
+#' rownames(exp_data) <- c(tf_list,paste0('gene',1:(nrow(exp_data)-length(tf_list))))
+#' colnames(exp_data) <- paste0('condition_',1:ncol(exp_data))
+#' se <- SummarizedExperiment(assays=list(counts=exp_data))
+#' gnet_result <- gnet(se,tf_list)
 #' plot_gene_group(gnet_result,group_idx=0)
 #' @export
 plot_gene_group <- function(gnet_result,group_idx){
@@ -167,10 +181,17 @@ plot_gene_group <- function(gnet_result,group_idx){
 #' Plot the correlation of each group
 #' 
 #' Plot the correlation of each group and auto detected knee point. It can be used to determined which clustered are kept for further analysis.
-#' @param avg_cor_list The average within group Pearson correlation coefficient of each group from gnet().
+#' @param gnet_result Results returned by gnet().
 #' 
 #' @return A list of indices of the data point with correlation higher than the knee point.
 #' @examples
+#' set.seed(1)
+#' exp_data <- matrix(rnorm(100*12),100,12)
+#' tf_list <- paste0('TF',1:10)
+#' rownames(exp_data) <- c(tf_list,paste0('gene',1:(nrow(exp_data)-length(tf_list))))
+#' colnames(exp_data) <- paste0('condition_',1:ncol(exp_data))
+#' se <- SummarizedExperiment(assays=list(counts=exp_data))
+#' gnet_result <- gnet(se,tf_list)
 #' group_keep <- plot_group_correlation(gnet_result)
 #' @export
 plot_group_correlation <- function(gnet_result){
@@ -178,20 +199,20 @@ plot_group_correlation <- function(gnet_result){
   avg_cor_list2 <- sort(avg_cor_list,decreasing = TRUE)
 
   kp <- kneepointDetection(avg_cor_list2)
-  graphics::plot(seq_len(length(avg_cor_list2)),avg_cor_list2,col=c(rep(3,kp),rep(2,length(avg_cor_list2)-kp)),
+  plot(seq_len(length(avg_cor_list2)),avg_cor_list2,col=c(rep(3,kp),rep(2,length(avg_cor_list2)-kp)),
        pch=1,cex =0.6,xlab='Cluster number',ylab='Average correlation',main='Cluster number vs. Average correlation')
 
   k1 <- avg_cor_list2[seq_len(kp)]
   k2 <- seq_len(kp)
   if(kp>1){
-    f1 <- stats::lm(k1 ~ k2)
-    graphics::lines(x=k2, y=stats::predict(f1, newdata=data.frame(x=k2)),col=3,lwd=2)
+    f1 <- lm(k1 ~ k2)
+    lines(x=k2, y=predict(f1, newdata=data.frame(x=k2)),col=3,lwd=2)
   }
   l1 <- avg_cor_list2[(kp+1):length(avg_cor_list2)]
   l2 <- (kp+1):length(avg_cor_list2)
   if(length(avg_cor_list2)-kp>1){
-    f2 <- stats::lm(l1 ~ l2)
-    graphics::lines(x=l2, y=stats::predict(f2, newdata=data.frame(x=l2)),col=2,lwd=2)
+    f2 <- lm(l1 ~ l2)
+    lines(x=l2, y=predict(f2, newdata=data.frame(x=l2)),col=2,lwd=2)
   }
   return(which(avg_cor_list >= avg_cor_list2[kp]))
 }

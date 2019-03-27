@@ -4,7 +4,7 @@
 \alias{gnet}
 \title{Run GNET2}
 \usage{
-gnet(input, reg_names, init_group_num = 20, max_partition_level = 4,
+gnet(input, reg_names, init_group_num = 4, max_partition_level = 3,
   cor_cutoff = 0.9, min_divide_size = 3, min_group_size = 2,
   max_iter = 5)
 }
@@ -21,9 +21,9 @@ gnet(input, reg_names, init_group_num = 20, max_partition_level = 4,
 
 \item{min_divide_size}{Minimum number of data belong to a node allowed for further split of the node.}
 
-\item{max_iter}{Maxumum number of iterations allowed if not converged.}
+\item{min_group_size}{Minimum number of genes allowed in a group.}
 
-\item{min_divide_size}{Minimum number of genes allowed in a group.}
+\item{max_iter}{Maxumum number of iterations allowed if not converged.}
 }
 \value{
 A list of expression data of genes, expression data of regulators, within group score, table of tree structure and final assigned group of each gene.
@@ -33,10 +33,10 @@ Build regulation modules by iteratively perform TF assigning and Gene assigning,
 }
 \examples{
 set.seed(1)
-exp_data <- matrix(rnorm(1000*12),1000,12)
-tf_list <- paste0('TF',1:100)
+exp_data <- matrix(rnorm(100*12),100,12)
+tf_list <- paste0('TF',1:10)
 rownames(exp_data) <- c(tf_list,paste0('gene',1:(nrow(exp_data)-length(tf_list))))
 colnames(exp_data) <- paste0('condition_',1:ncol(exp_data))
 se <- SummarizedExperiment(assays=list(counts=exp_data))
-gnet_result <- gnet(se,tf_list,init_group_num,max_partition_level,cor_cutoff,min_divide_size,min_group_size,max_iter)
+gnet_result <- gnet(se,tf_list)
 }

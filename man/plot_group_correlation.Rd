@@ -7,7 +7,7 @@
 plot_group_correlation(gnet_result)
 }
 \arguments{
-\item{avg_cor_list}{The average within group Pearson correlation coefficient of each group from gnet().}
+\item{gnet_result}{Results returned by gnet().}
 }
 \value{
 A list of indices of the data point with correlation higher than the knee point.
@@ -16,5 +16,12 @@ A list of indices of the data point with correlation higher than the knee point.
 Plot the correlation of each group and auto detected knee point. It can be used to determined which clustered are kept for further analysis.
 }
 \examples{
+set.seed(1)
+exp_data <- matrix(rnorm(100*12),100,12)
+tf_list <- paste0('TF',1:10)
+rownames(exp_data) <- c(tf_list,paste0('gene',1:(nrow(exp_data)-length(tf_list))))
+colnames(exp_data) <- paste0('condition_',1:ncol(exp_data))
+se <- SummarizedExperiment(assays=list(counts=exp_data))
+gnet_result <- gnet(se,tf_list)
 group_keep <- plot_group_correlation(gnet_result)
 }

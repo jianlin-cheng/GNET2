@@ -98,7 +98,8 @@ IntegerVector find_new_split(NumericMatrix X, NumericMatrix Y,IntegerVector grou
 //' 
 //' @return A matrix for sample informatrion for each partition level. First column is feature index used by the node and second is the value used to split, the rest of the columns are the split of sample: 0 means less or equal, 1 means greater and -1 means the sample does not belong to this node.
 //' @examples
-//' build_module(X = matrix(rnorm(50*100),50,100), Y = matrix(rnorm(50*200),50,200))
+//' build_module(X = matrix(rnorm(50*100),50,100), Y = matrix(rnorm(50*200),50,200),
+//'               max_partition_level=4,cor_cutoff=0.9,min_divide_size=3)
 //' @export
 // [[Rcpp::export]]
 NumericMatrix build_module(NumericMatrix X,NumericMatrix Y, int max_partition_level,double cor_cutoff, int min_divide_size) {
