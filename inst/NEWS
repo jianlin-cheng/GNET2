@@ -1,3 +1,6 @@
+Changes in version 0.99.2 (2018-3-28)
++ Finished gradient boosting based initial clustering 
+
 Changes in version 0.99.1 (2018-3-28)
 + Submitted to Bioconductor
 

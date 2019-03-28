@@ -83,7 +83,7 @@ get_leaf_labels <- function(group_table,format_plot=FALSE){
 #'  which is C++ version but gives flexibility of customization of R functions.
 #' @param X A n by p matrix as input.
 #' @param Y A n by q matrix as response.
-#' @param max_partition_level Maximum partition level in the tree.
+#' @param max_depth Maximum partition level in the tree.
 #' @param cor_cutoff Cutoff for within group Pearson correlation coefficient, if all data belong to a node have
 #'  average correlation greater or equal to this, the node would not split anymore.
 #' @param min_divide_size Minimum number of data belong to a node allowed for further split of the node.
@@ -94,15 +94,15 @@ get_leaf_labels <- function(group_table,format_plot=FALSE){
 #' does not belong to this node.
 #' @examples
 #' build_moduleR(X = matrix(rnorm(10*10),10,10), Y = matrix(rnorm(10*10),10,10),
-#'               max_partition_level=2,cor_cutoff=0.9,min_divide_size=3)
+#'               max_depth=2,cor_cutoff=0.9,min_divide_size=3)
 #' @export
-build_moduleR <- function(X,Y,max_partition_level,cor_cutoff,min_divide_size){
+build_moduleR <- function(X,Y,max_depth,cor_cutoff,min_divide_size){
   feature_remaining <- seq_len(ncol(X))
   feature_num <- 0
   subgroup_indicator <- rep(0,nrow(X))
   groups <- c(0)
   group_table <- matrix(0, nrow = 0, ncol = nrow(X)+1)
-  while (feature_num < max_partition_level & length(groups)>0 & length(feature_remaining)>0){
+  while (feature_num < max_depth & length(groups)>0 & length(feature_remaining)>0){
     best_score <- (-(10^6))
     best_feature <- (-1)
     for(i in groups){
@@ -143,8 +143,8 @@ build_moduleR <- function(X,Y,max_partition_level,cor_cutoff,min_divide_size){
   return(group_table)
 }
 
-assign_tf <- function(regulator_data,gene_data,gene_group_table,reg_names,
-                             min_group_size,max_partition_level,cor_cutoff,min_divide_size){
+assign_tf <- function(regulator_data,gene_data,gene_group_table,min_group_size,max_depth,
+                      cor_cutoff,min_divide_size){
   X <- t(regulator_data)
   group_labels <- unique(gene_group_table)
   group_labels <- group_labels[group_labels!=-1]
@@ -155,28 +155,8 @@ assign_tf <- function(regulator_data,gene_data,gene_group_table,reg_names,
     gene_idx <- gene_group_table == group_idx
     if (sum(gene_idx) >= min_group_size){
       Y <- t(gene_data[gene_idx,])
-      group_table_i <- build_module(X,Y,max_partition_level,cor_cutoff,min_divide_size)
+      group_table_i <- build_module(X,Y,max_depth,cor_cutoff,min_divide_size)
       group_table_i <- group_table_i[apply(group_table_i, 1, function(x)(sum(x!=0)))!=0,]
-      reg_group_table <- rbind(reg_group_table,get_leaf_labels(group_table_i))
-      group_table <- rbind(group_table,cbind(i,group_table_i))
-      i <- i+1
-    }
-  }
-  return(list(group_table,reg_group_table))
-}
-
-assign_tfR <- function(regulator_data,gene_data,gene_group_table,reg_names,
-                             min_group_size,max_partition_level,cor_cutoff,min_divide_size){
-  X <- t(regulator_data)
-  group_labels <- 0:max(gene_group_table)
-  reg_group_table <- matrix(0,nrow = 0,ncol = ncol(regulator_data))
-  group_table <- matrix(0,nrow = 0,ncol = ncol(regulator_data)+2)
-  i <- 0
-  for (group_idx in group_labels){
-    gene_idx <- gene_group_table == group_idx
-    if (sum(gene_idx) >= min_group_size){
-      Y <- t(gene_data[gene_idx,])
-      group_table_i <- build_moduleR(X,Y,max_partition_level,cor_cutoff,min_divide_size)
       reg_group_table <- rbind(reg_group_table,get_leaf_labels(group_table_i))
       group_table <- rbind(group_table,cbind(i,group_table_i))
       i <- i+1
@@ -228,32 +208,48 @@ kneepointDetection <-function (vect) {
   return(MinIndex)
 }
 
-run_gnet <- function(gene_data,regulator_data,init_group_num = 5,max_partition_level = 3,
-                    cor_cutoff = 0.9,min_divide_size = 3,min_group_size = 2,max_iter = 5){
-  min_group_num=3
-  message('Determine initial group number')
-  reg_names <- rownames(regulator_data)
+
+assign_first_cluster <- function(gene_data,regulator_data,max_depth,init_group_num,init_method='boosting'){
+  if(init_method=='boosting'){
+    ipt_mat <- matrix(0,nrow = nrow(gene_data),ncol = nrow(regulator_data))
+    rownames(ipt_mat) <- rownames(gene_data)
+    colnames(ipt_mat) <- rownames(regulator_data)
+    for(i in seq_len(nrow(gene_data))){
+      dtrain <- xgb.DMatrix(data = t(regulator_data), label=gene_data[i,])
+      bst <- xgb.train(data=dtrain, max.depth=max_depth, eta=0.1, nthread = 2,nrounds =2)
+      importance_matrix <- xgb.importance(model = bst)
+      ipt_mat[i,importance_matrix$Feature] <- importance_matrix$Gain
+    }
+  }else{
+    ipt_mat <- gene_data
+  }
   avg_cor_list <- c()
   for(i in 2:min(init_group_num,nrow(gene_data)-1)){
-    gene_group_table <- as.numeric(kmeans(gene_data,centers = i)$cluster)-1
+    gene_group_table <- as.numeric(kmeans(ipt_mat,centers = i)$cluster)-1
     avg_cor_list <- c(avg_cor_list,mean(get_correlation_list(t(gene_data),gene_group_table)))
-    if(length(avg_cor_list)>=min_group_num){
-      o <- order(avg_cor_list,decreasing = TRUE)
-      y <- avg_cor_list[o]
-      kn <- kneepointDetection(y)
-      groups_keep <- o[seq_len(max(kn,min_group_num))]
-    }else{
-      groups_keep <- seq_len(length(avg_cor_list))
-    }
-    gene_group_table[!(gene_group_table %in% groups_keep)] <- -1
   }
+  if(length(avg_cor_list)>=3){
+    o <- order(avg_cor_list,decreasing = TRUE)
+    y <- avg_cor_list[o]
+    kn <- kneepointDetection(y)
+    groups_keep <- o[seq_len(max(kn,3))]
+  }else{
+    groups_keep <- seq_len(length(avg_cor_list))
+  }
+  gene_group_table[!(gene_group_table %in% groups_keep)] <- (-1)
+  return(gene_group_table)
+}
 
-
-  message('Building module networks')
+run_gnet <- function(gene_data,regulator_data,init_method = 'boosting',init_group_num = 5,
+                     max_depth = 3,cor_cutoff = 0.9,min_divide_size = 3,min_group_size = 2,max_iter = 5){
+  message('Determining initial group number...')
+  gene_group_table <- assign_first_cluster(gene_data,regulator_data,max_depth,init_group_num,init_method)
+  
+  message('Building module networks...')
   for (i in seq_len(max_iter)) {
     message(paste('iteration',i))
-    assign_reg_names <- assign_tf(regulator_data,gene_data,gene_group_table,reg_names,
-                                       min_group_size,max_partition_level,cor_cutoff,min_divide_size)
+    assign_reg_names <- assign_tf(regulator_data,gene_data,gene_group_table,min_group_size,
+                                  max_depth,cor_cutoff,min_divide_size)
     gene_group_table_new <- assign_gene(gene_data,assign_reg_names[[2]])
     if(all(length(gene_group_table)==length(gene_group_table_new)) &&
        all(gene_group_table==gene_group_table_new)){
@@ -283,8 +279,9 @@ run_gnet <- function(gene_data,regulator_data,init_group_num = 5,max_partition_l
 #' @param input A SummarizedExperiment object, or a p by n matrix of expression data of p genes and n samples,
 #'  for example log2 RPKM from RNA-Seq.
 #' @param reg_names A list of potential upstream regulators names, for example a list of known transcription factors.
+#' @param init_method Cluster initialization, can be "boosting" or "kmeans", default is using "boosting".
 #' @param init_group_num Initial number of function clusters used by the algorithm.
-#' @param max_partition_level max_partition_level Maximum partition level in the tree.
+#' @param max_depth max_depth Maximum partition level in the tree.
 #' @param cor_cutoff  Cutoff for within group Pearson correlation coefficient, if all data belong to a node have
 #'  average correlation greater or equal to this, the node would not split anymore.
 #' @param min_divide_size Minimum number of data belong to a node allowed for further split of the node.
@@ -302,15 +299,15 @@ run_gnet <- function(gene_data,regulator_data,init_group_num = 5,max_partition_l
 #' se <- SummarizedExperiment::SummarizedExperiment(assays=list(counts=exp_data))
 #' gnet_result <- gnet(se,tf_list)
 #' @export
-gnet <- function(input,reg_names,init_group_num = 4,max_partition_level = 3,
+gnet <- function(input,reg_names,init_method= 'boosting',init_group_num = 4,max_depth = 3,
                  cor_cutoff = 0.9,min_divide_size = 3,min_group_size = 2,max_iter = 5){
   if(is(input,class2 = "SummarizedExperiment")){
     input <- assay(input)
   }
   gene_data <- input[!rownames(input)%in%reg_names,]
   regulator_data <- input[reg_names,]
-  result_all <- run_gnet(gene_data,regulator_data,init_group_num,max_partition_level,cor_cutoff,min_divide_size,
-                        min_group_size,max_iter)
+  result_all <- run_gnet(gene_data,regulator_data,init_method,init_group_num,max_depth,
+                         cor_cutoff,min_divide_size,min_group_size,max_iter)
   reg_group_table <- result_all[[1]]
   gene_group_table <- result_all[[2]]
   avg_cor_list <- rep(0,length(unique(gene_group_table$group)))
