@@ -52,7 +52,7 @@ se <- SummarizedExperiment::SummarizedExperiment(assays=list(counts=exp_data))
 The module construction process make take a few time, depending on the size of data and maximum iterations allowed. 
 
 ```{r, echo=TRUE}
-gnet_result = gnet(se,tf_list,init_group_num = 20,max_partition_level = 4,cor_cutoff = 0.9,
+gnet_result = gnet(se,tf_list,init_group_num = 20,max_depth = 4,cor_cutoff = 0.9,
                    min_divide_size = 3,min_group_size = 2,max_iter = 5)
 ```
 
