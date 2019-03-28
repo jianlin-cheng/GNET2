@@ -1,6 +1,6 @@
 Package: GNET2
 Type: Package
-Title: GNET2: Constructing module pathwaynetworks from expression data
+Title: GNET2: Constructing module pathway networks from expression data
 Version: 0.1.1
 Author: Chen Chen
 Maintainer: Chen Chen <ccm3x@mail.missouri.edu>
