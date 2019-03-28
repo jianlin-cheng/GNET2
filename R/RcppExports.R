@@ -12,7 +12,8 @@
 #' 
 #' @return A matrix for sample informatrion for each partition level. First column is feature index used by the node and second is the value used to split, the rest of the columns are the split of sample: 0 means less or equal, 1 means greater and -1 means the sample does not belong to this node.
 #' @examples
-#' build_module(X = matrix(rnorm(50*100),50,100), Y = matrix(rnorm(50*200),50,200))
+#' build_module(X = matrix(rnorm(50*100),50,100), Y = matrix(rnorm(50*200),50,200),
+#'               max_partition_level=4,cor_cutoff=0.9,min_divide_size=3)
 #' @export
 build_module <- function(X, Y, max_partition_level, cor_cutoff, min_divide_size) {
     .Call('_GNET2_build_module', PACKAGE = 'GNET2', X, Y, max_partition_level, cor_cutoff, min_divide_size)
