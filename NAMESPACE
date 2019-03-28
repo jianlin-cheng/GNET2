@@ -10,6 +10,7 @@ export(plot_gene_group)
 export(plot_group_correlation)
 export(plot_tree)
 
+importFrom(Rcpp, evalCpp)
 importFrom(DiagrammeR,create_node_df)
 importFrom(DiagrammeR,create_edge_df)
 importFrom(DiagrammeR,create_graph)
