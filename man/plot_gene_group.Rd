@@ -15,7 +15,10 @@ plot_gene_group(gnet_result, group_idx)
 None
 }
 \description{
-Plot the regulators module and heatmap of the expression inferred downstream genes for each sample. It can be interpreted as two parts: the bars at the top shows how samples are splited by the regression tree and the heatmap at the bottom shows how downstream genes are regulated by each subgroup determined by the regulators.
+Plot the regulators module and heatmap of the expression inferred downstream genes for each sample. 
+It can be interpreted as two parts: the bars at the top shows how samples are splited by the 
+regression tree and the heatmap at the bottom shows how downstream genes are regulated by each 
+subgroup determined by the regulators.
 }
 \examples{
 set.seed(1)

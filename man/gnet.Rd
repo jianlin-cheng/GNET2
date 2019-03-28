@@ -9,7 +9,8 @@ gnet(input, reg_names, init_group_num = 4, max_partition_level = 3,
   max_iter = 5)
 }
 \arguments{
-\item{input}{A SummarizedExperiment object, or a p by n matrix of expression data of p genes and n samples, for example log2 RPKM from RNA-Seq.}
+\item{input}{A SummarizedExperiment object, or a p by n matrix of expression data of p genes and n samples,
+for example log2 RPKM from RNA-Seq.}
 
 \item{reg_names}{A list of potential upstream regulators names, for example a list of known transcription factors.}
 
@@ -17,7 +18,8 @@ gnet(input, reg_names, init_group_num = 4, max_partition_level = 3,
 
 \item{max_partition_level}{max_partition_level Maximum partition level in the tree.}
 
-\item{cor_cutoff}{Cutoff for within group Pearson correlation coefficient, if all data belong to a node have average correlation greater or equal to this, the node would not split anymore.}
+\item{cor_cutoff}{Cutoff for within group Pearson correlation coefficient, if all data belong to a node have
+average correlation greater or equal to this, the node would not split anymore.}
 
 \item{min_divide_size}{Minimum number of data belong to a node allowed for further split of the node.}
 
@@ -26,10 +28,12 @@ gnet(input, reg_names, init_group_num = 4, max_partition_level = 3,
 \item{max_iter}{Maxumum number of iterations allowed if not converged.}
 }
 \value{
-A list of expression data of genes, expression data of regulators, within group score, table of tree structure and final assigned group of each gene.
+A list of expression data of genes, expression data of regulators, within group score, table of tree 
+structure and final assigned group of each gene.
 }
 \description{
-Build regulation modules by iteratively perform TF assigning and Gene assigning, until the assignment of genes did not change, or max number of iterations reached.
+Build regulation modules by iteratively perform TF assigning and Gene assigning, until the assignment of 
+genes did not change, or max number of iterations reached.
 }
 \examples{
 set.seed(1)

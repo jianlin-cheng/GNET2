@@ -13,7 +13,8 @@ plot_group_correlation(gnet_result)
 A list of indices of the data point with correlation higher than the knee point.
 }
 \description{
-Plot the correlation of each group and auto detected knee point. It can be used to determined which clustered are kept for further analysis.
+Plot the correlation of each group and auto detected knee point. It can be used to 
+determined which clustered are kept for further analysis.
 }
 \examples{
 set.seed(1)

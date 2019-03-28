@@ -88,13 +88,17 @@ plot_tree <- function(gnet_result,group_idx){
                        attr_theme = NULL) %>% DiagrammeR::add_global_graph_attrs(attr_type = "graph", 
                       attr = c("layout", "rankdir"),
                       value = c("dot", "LR")) %>% DiagrammeR::add_global_graph_attrs(attr_type = "node", 
-                      attr = c("fillcolor", "style", "fontname"), value = c("Azure","filled", "Helvetica"))
+                      attr = c("fillcolor", "style", "fontname"), 
+                      value = c("Azure","filled", "Helvetica"))
   render_graph(graph)
 }
 
 #' Plot a module
 #' 
-#' Plot the regulators module and heatmap of the expression inferred downstream genes for each sample. It can be interpreted as two parts: the bars at the top shows how samples are splited by the regression tree and the heatmap at the bottom shows how downstream genes are regulated by each subgroup determined by the regulators.
+#' Plot the regulators module and heatmap of the expression inferred downstream genes for each sample. 
+#' It can be interpreted as two parts: the bars at the top shows how samples are splited by the 
+#' regression tree and the heatmap at the bottom shows how downstream genes are regulated by each 
+#' subgroup determined by the regulators.
 #' @param gnet_result Results returned by gnet().
 #' @param group_idx Index of the module.
 #' @return None
@@ -139,12 +143,14 @@ plot_gene_group <- function(gnet_result,group_idx){
 
     rownames(exp_val1) <- seq_len(nrow(exp_val1))
     exp_val.m <- melt(exp_val1,id.vars = NULL)
-    exp_val.m <- cbind.data.frame('y_idx'=rep(seq_len(nrow(exp_val1)),ncol(exp_val1)),exp_val.m,stringsAsFactors=FALSE)
+    exp_val.m <- cbind.data.frame('y_idx'=rep(seq_len(nrow(exp_val1)),ncol(exp_val1)),
+                                  exp_val.m,stringsAsFactors=FALSE)
     exp_label <- rep('',ncol(exp_val1))
     exp_label[group_table2[i,]==0] <- 'Low'
     exp_label[group_table2[i,]==1] <- 'High'
 
-    p <- ggplot2::ggplot(exp_val.m, aes(variable, y_idx)) + geom_tile(aes(fill = value), colour = "white") +
+    p <- ggplot(exp_val.m, aes_string('variable', 'y_idx')) + 
+      geom_tile(aes_string(fill = 'value'), colour = "white") +
       scale_x_discrete(labels=exp_label)+
       scale_fill_gradient(low = "darkgreen",high = "red",na.value = "white",
                           limits=c(lengend_low, lengend_high),
@@ -164,14 +170,17 @@ plot_gene_group <- function(gnet_result,group_idx){
   exp_lengend_low <- min(exp_data2)
   exp_lengend_high <- max(exp_data2)
   test_data.m <- melt(cbind.data.frame('gene'=rownames(exp_data2),exp_data2,stringsAsFactors=FALSE),id.vars = 'gene')
-  p <- ggplot2::ggplot(test_data.m, aes(variable, gene)) + geom_tile(aes(fill = value), colour = "white") +
+  p <- ggplot(test_data.m, aes_string('variable', 'gene')) + 
+    geom_tile(aes_string(fill = 'value'), colour = "white") +
     scale_fill_gradient(low = "darkgreen",high = "red",na.value = "white",
                         limits=c(exp_lengend_low, exp_lengend_high),
                         breaks=seq(exp_lengend_low,exp_lengend_high,length.out = 4),labels=scaleFUN)+
     theme(axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank(),
-          axis.title.x=element_blank(),legend.text=element_text(size=7),legend.key.size = unit(0.2, "cm"),
+          axis.title.x=element_blank(),legend.text=element_text(size=7),
+          legend.key.size = unit(0.2, "cm"),
           panel.border = element_blank(), panel.grid.major = element_blank(),
-          panel.background = element_blank(),legend.title=element_blank(),axis.text.x = element_text(angle = 45, hjust = 1),
+          panel.background = element_blank(),legend.title=element_blank(),
+          axis.text.x = element_text(angle = 45, hjust = 1),
           panel.grid.minor = element_blank(), axis.line = element_line(colour = "white"),
           legend.position="right", legend.box = "vertical")
   regulators_plist[[length(regulators_plist)+1]] <- p
@@ -180,7 +189,8 @@ plot_gene_group <- function(gnet_result,group_idx){
 
 #' Plot the correlation of each group
 #' 
-#' Plot the correlation of each group and auto detected knee point. It can be used to determined which clustered are kept for further analysis.
+#' Plot the correlation of each group and auto detected knee point. It can be used to 
+#' determined which clustered are kept for further analysis.
 #' @param gnet_result Results returned by gnet().
 #' 
 #' @return A list of indices of the data point with correlation higher than the knee point.
@@ -200,7 +210,8 @@ plot_group_correlation <- function(gnet_result){
 
   kp <- kneepointDetection(avg_cor_list2)
   plot(seq_len(length(avg_cor_list2)),avg_cor_list2,col=c(rep(3,kp),rep(2,length(avg_cor_list2)-kp)),
-       pch=1,cex =0.6,xlab='Cluster number',ylab='Average correlation',main='Cluster number vs. Average correlation')
+       pch=1,cex =0.6,xlab='Cluster number',ylab='Average correlation',
+       main='Cluster number vs. Average correlation')
 
   k1 <- avg_cor_list2[seq_len(kp)]
   k2 <- seq_len(kp)

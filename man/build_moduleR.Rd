@@ -13,16 +13,20 @@ build_moduleR(X, Y, max_partition_level, cor_cutoff, min_divide_size)
 
 \item{max_partition_level}{Maximum partition level in the tree.}
 
-\item{cor_cutoff}{Cutoff for within group Pearson correlation coefficient, if all data belong to a node have average correlation greater or equal to this, the node would not split anymore.}
+\item{cor_cutoff}{Cutoff for within group Pearson correlation coefficient, if all data belong to a node have
+average correlation greater or equal to this, the node would not split anymore.}
 
 \item{min_divide_size}{Minimum number of data belong to a node allowed for further split of the node.}
 }
 \value{
-A matrix for sample informatrion for each partition level. First column is feature index used by the node and second is the value used to split, 
-the rest of the columns are the split of sample: 0 means less or equal, 1 means greater and -1 means the sample does not belong to this node.
+A matrix for sample informatrion for each partition level. First column is feature index used by the 
+node and second is the value used to split, 
+the rest of the columns are the split of sample: 0 means less or equal, 1 means greater and -1 means the sample 
+does not belong to this node.
 }
 \description{
-R version of build regression tree based on Gaussian Likelihood score. Runs slower than the build_module() which is C++ version but gives flexibility of customization of R functions.
+R version of build regression tree based on Gaussian Likelihood score. Runs slower than the build_module() 
+ which is C++ version but gives flexibility of customization of R functions.
 }
 \examples{
 build_moduleR(X = matrix(rnorm(10*10),10,10), Y = matrix(rnorm(10*10),10,10),

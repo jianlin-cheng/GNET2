@@ -79,15 +79,19 @@ get_leaf_labels <- function(group_table,format_plot=FALSE){
 
 #' R code version of build regression tree.
 #'
-#'  R version of build regression tree based on Gaussian Likelihood score. Runs slower than the build_module() which is C++ version but gives flexibility of customization of R functions.
+#'  R version of build regression tree based on Gaussian Likelihood score. Runs slower than the build_module() 
+#'  which is C++ version but gives flexibility of customization of R functions.
 #' @param X A n by p matrix as input.
 #' @param Y A n by q matrix as response.
 #' @param max_partition_level Maximum partition level in the tree.
-#' @param cor_cutoff Cutoff for within group Pearson correlation coefficient, if all data belong to a node have average correlation greater or equal to this, the node would not split anymore.
+#' @param cor_cutoff Cutoff for within group Pearson correlation coefficient, if all data belong to a node have
+#'  average correlation greater or equal to this, the node would not split anymore.
 #' @param min_divide_size Minimum number of data belong to a node allowed for further split of the node.
 #' 
-#' @return A matrix for sample informatrion for each partition level. First column is feature index used by the node and second is the value used to split, 
-#' the rest of the columns are the split of sample: 0 means less or equal, 1 means greater and -1 means the sample does not belong to this node.
+#' @return A matrix for sample informatrion for each partition level. First column is feature index used by the 
+#' node and second is the value used to split, 
+#' the rest of the columns are the split of sample: 0 means less or equal, 1 means greater and -1 means the sample 
+#' does not belong to this node.
 #' @examples
 #' build_moduleR(X = matrix(rnorm(10*10),10,10), Y = matrix(rnorm(10*10),10,10),
 #'               max_partition_level=2,cor_cutoff=0.9,min_divide_size=3)
@@ -274,17 +278,21 @@ run_gnet <- function(gene_data,regulator_data,init_group_num = 5,max_partition_l
 
 #' Run GNET2
 #' 
-#' Build regulation modules by iteratively perform TF assigning and Gene assigning, until the assignment of genes did not change, or max number of iterations reached.
-#' @param input A SummarizedExperiment object, or a p by n matrix of expression data of p genes and n samples, for example log2 RPKM from RNA-Seq.
+#' Build regulation modules by iteratively perform TF assigning and Gene assigning, until the assignment of 
+#' genes did not change, or max number of iterations reached.
+#' @param input A SummarizedExperiment object, or a p by n matrix of expression data of p genes and n samples,
+#'  for example log2 RPKM from RNA-Seq.
 #' @param reg_names A list of potential upstream regulators names, for example a list of known transcription factors.
 #' @param init_group_num Initial number of function clusters used by the algorithm.
 #' @param max_partition_level max_partition_level Maximum partition level in the tree.
-#' @param cor_cutoff  Cutoff for within group Pearson correlation coefficient, if all data belong to a node have average correlation greater or equal to this, the node would not split anymore.
+#' @param cor_cutoff  Cutoff for within group Pearson correlation coefficient, if all data belong to a node have
+#'  average correlation greater or equal to this, the node would not split anymore.
 #' @param min_divide_size Minimum number of data belong to a node allowed for further split of the node.
 #' @param min_group_size Minimum number of genes allowed in a group.
 #' @param max_iter Maxumum number of iterations allowed if not converged.
 #' 
-#' @return A list of expression data of genes, expression data of regulators, within group score, table of tree structure and final assigned group of each gene.
+#' @return A list of expression data of genes, expression data of regulators, within group score, table of tree 
+#' structure and final assigned group of each gene.
 #' @examples
 #' set.seed(1)
 #' exp_data <- matrix(rnorm(100*12),100,12)

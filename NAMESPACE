@@ -14,6 +14,8 @@ importFrom('stats','predict')
 importFrom('graphics','plot')
 importFrom('graphics','lines')
 importFrom('methods','is')
+importFrom('ggplot2','ggplot')
+importFrom('ggplot2','is')
 
 
 useDynLib(GNET2)
