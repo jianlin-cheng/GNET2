@@ -1,4 +1,8 @@
-GNET2 0.1.0:
+Changes in version 0.1.1 (2018-3-28)
++ Submitted to Bioconductor
+
+
+GNET2 0.1.0 (2018-3-28)
 
 The GNET matlab package was first released in 2013 and described in the publication:
 
@@ -7,4 +11,4 @@ Predicting gene regulatory networks of soybean nodulation from RNA-Seq transcrip
 BMC Bioinformatics, 2013;14(1):278.
 https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-14-278
 
-It was an independently released R package by the Chen Chen in Jianlin Cheng Lab, which is rewritten in C++ with R interface.
+It was an independently released R package by the Chen Chen in Jianlin Cheng Lab, which added support to R interface.
