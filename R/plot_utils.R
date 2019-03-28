@@ -36,7 +36,7 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 #' tf_list <- paste0('TF',1:10)
 #' rownames(exp_data) <- c(tf_list,paste0('gene',1:(nrow(exp_data)-length(tf_list))))
 #' colnames(exp_data) <- paste0('condition_',1:ncol(exp_data))
-#' se <- SummarizedExperiment(assays=list(counts=exp_data))
+#' se <- SummarizedExperiment::SummarizedExperiment(assays=list(counts=exp_data))
 #' gnet_result <- gnet(se,tf_list)
 #' plot_tree(gnet_result,group_idx=0)
 #' @export
@@ -199,7 +199,7 @@ plot_gene_group <- function(gnet_result,group_idx){
 #' tf_list <- paste0('TF',1:10)
 #' rownames(exp_data) <- c(tf_list,paste0('gene',1:(nrow(exp_data)-length(tf_list))))
 #' colnames(exp_data) <- paste0('condition_',1:ncol(exp_data))
-#' se <- SummarizedExperiment(assays=list(counts=exp_data))
+#' se <- SummarizedExperiment::SummarizedExperiment(assays=list(counts=exp_data))
 #' gnet_result <- gnet(se,tf_list)
 #' group_keep <- plot_group_correlation(gnet_result)
 #' @export
