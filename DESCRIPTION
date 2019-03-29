@@ -1,8 +1,8 @@
 Package: GNET2
 Type: Package
-Title: GNET2: Constructing module pathwaynetworks from expression data
-Version: 0.1.0
-Author: Chen Chen
+Title: GNET2: Constructing module pathway networks from expression data
+Version: 0.99.3
+Author: Chen Chen, Jie Hou and Jianlin Cheng
 Maintainer: Chen Chen <ccm3x@mail.missouri.edu>
 Description: Cluster genes to functional groups with E-M process.
     Iteratively perform TF assigning and Gene assigning, until the assignment of genes did not change, or max number of iterations is reached.
@@ -11,10 +11,9 @@ Encoding: UTF-8
 LazyData: true
 LinkingTo: Rcpp
 Depends:
-    R (>= 3.5),
-    SummarizedExperiment (>= 1.1.6)
+    R (>= 3.6),
 Imports:
-    ggplot2,reshape2,grid,DiagrammeR,Rcpp,methods,stats,graphics
+    ggplot2,xgboost,Rcpp,reshape2,grid,DiagrammeR,methods,stats,graphics,SummarizedExperiment
 RoxygenNote: 6.1.1
 Suggests: 
     knitr,

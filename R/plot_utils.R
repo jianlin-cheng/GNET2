@@ -36,7 +36,7 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 #' tf_list <- paste0('TF',1:10)
 #' rownames(exp_data) <- c(tf_list,paste0('gene',1:(nrow(exp_data)-length(tf_list))))
 #' colnames(exp_data) <- paste0('condition_',1:ncol(exp_data))
-#' se <- SummarizedExperiment(assays=list(counts=exp_data))
+#' se <- SummarizedExperiment::SummarizedExperiment(assays=list(counts=exp_data))
 #' gnet_result <- gnet(se,tf_list)
 #' plot_tree(gnet_result,group_idx=0)
 #' @export
@@ -56,7 +56,7 @@ plot_tree <- function(gnet_result,group_idx){
   leaf_idx <- 0
   from_list <- to_list <- edge_labels <- c()
   for(i in seq_len((nrow(tree_i)-1))){
-    for(j in 0:1){
+    for(j in seq_len(2)-1){
       found_node <- FALSE
       split_i_j <- tree_i[i,3:ncol(tree_i)]==j
       for (k in (i+1):nrow(tree_i)) {
@@ -83,12 +83,11 @@ plot_tree <- function(gnet_result,group_idx){
   edge_labels <- c(edge_labels,'true','false')
   node_df <- create_node_df(n = length(label_list),type = "a",label = label_list,style = "filled",
                             color = "aqua",shape = "ellipse",width = 0.9,fontsize = 6)
-  edge_df <-create_edge_df(from = from_list,to = to_list,label = tolower(edge_labels),fontsize = 6)
-  graph <-create_graph(nodes_df = node_df,edges_df = edge_df,
-                       attr_theme = NULL) %>% DiagrammeR::add_global_graph_attrs(attr_type = "graph", 
-                      attr = c("layout", "rankdir"),
-                      value = c("dot", "LR")) %>% DiagrammeR::add_global_graph_attrs(attr_type = "node", 
-                      attr = c("fillcolor", "style", "fontname"), 
+  edge_df <- create_edge_df(from = from_list,to = to_list,label = tolower(edge_labels),fontsize = 6)
+  graph <- create_graph(nodes_df = node_df,edges_df = edge_df,attr_theme = NULL) 
+  graph <- add_global_graph_attrs(graph,attr_type = "graph",attr = c("layout", "rankdir"),
+                                   value = c("dot", "LR"))
+  graph <- add_global_graph_attrs(graph,attr_type = "node", attr = c("fillcolor", "style", "fontname"), 
                       value = c("Azure","filled", "Helvetica"))
   render_graph(graph)
 }
@@ -108,7 +107,7 @@ plot_tree <- function(gnet_result,group_idx){
 #' tf_list <- paste0('TF',1:10)
 #' rownames(exp_data) <- c(tf_list,paste0('gene',1:(nrow(exp_data)-length(tf_list))))
 #' colnames(exp_data) <- paste0('condition_',1:ncol(exp_data))
-#' se <- SummarizedExperiment(assays=list(counts=exp_data))
+#' se <- SummarizedExperiment::SummarizedExperiment(assays=list(counts=exp_data))
 #' gnet_result <- gnet(se,tf_list)
 #' plot_gene_group(gnet_result,group_idx=0)
 #' @export
@@ -200,7 +199,7 @@ plot_gene_group <- function(gnet_result,group_idx){
 #' tf_list <- paste0('TF',1:10)
 #' rownames(exp_data) <- c(tf_list,paste0('gene',1:(nrow(exp_data)-length(tf_list))))
 #' colnames(exp_data) <- paste0('condition_',1:ncol(exp_data))
-#' se <- SummarizedExperiment(assays=list(counts=exp_data))
+#' se <- SummarizedExperiment::SummarizedExperiment(assays=list(counts=exp_data))
 #' gnet_result <- gnet(se,tf_list)
 #' group_keep <- plot_group_correlation(gnet_result)
 #' @export

@@ -4,14 +4,14 @@
 \alias{build_moduleR}
 \title{R code version of build regression tree.}
 \usage{
-build_moduleR(X, Y, max_partition_level, cor_cutoff, min_divide_size)
+build_moduleR(X, Y, max_depth, cor_cutoff, min_divide_size)
 }
 \arguments{
 \item{X}{A n by p matrix as input.}
 
 \item{Y}{A n by q matrix as response.}
 
-\item{max_partition_level}{Maximum partition level in the tree.}
+\item{max_depth}{Maximum partition level in the tree.}
 
 \item{cor_cutoff}{Cutoff for within group Pearson correlation coefficient, if all data belong to a node have
 average correlation greater or equal to this, the node would not split anymore.}
@@ -30,5 +30,5 @@ R version of build regression tree based on Gaussian Likelihood score. Runs slow
 }
 \examples{
 build_moduleR(X = matrix(rnorm(10*10),10,10), Y = matrix(rnorm(10*10),10,10),
-              max_partition_level=2,cor_cutoff=0.9,min_divide_size=3)
+              max_depth=2,cor_cutoff=0.9,min_divide_size=3)
 }

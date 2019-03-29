@@ -4,9 +4,9 @@
 \alias{gnet}
 \title{Run GNET2}
 \usage{
-gnet(input, reg_names, init_group_num = 4, max_partition_level = 3,
-  cor_cutoff = 0.9, min_divide_size = 3, min_group_size = 2,
-  max_iter = 5)
+gnet(input, reg_names, init_method = "boosting", init_group_num = 4,
+  max_depth = 3, cor_cutoff = 0.9, min_divide_size = 3,
+  min_group_size = 2, max_iter = 5)
 }
 \arguments{
 \item{input}{A SummarizedExperiment object, or a p by n matrix of expression data of p genes and n samples,
@@ -14,9 +14,11 @@ for example log2 RPKM from RNA-Seq.}
 
 \item{reg_names}{A list of potential upstream regulators names, for example a list of known transcription factors.}
 
+\item{init_method}{Cluster initialization, can be "boosting" or "kmeans", default is using "boosting".}
+
 \item{init_group_num}{Initial number of function clusters used by the algorithm.}
 
-\item{max_partition_level}{max_partition_level Maximum partition level in the tree.}
+\item{max_depth}{max_depth Maximum partition level in the tree.}
 
 \item{cor_cutoff}{Cutoff for within group Pearson correlation coefficient, if all data belong to a node have
 average correlation greater or equal to this, the node would not split anymore.}
@@ -41,6 +43,6 @@ exp_data <- matrix(rnorm(100*12),100,12)
 tf_list <- paste0('TF',1:10)
 rownames(exp_data) <- c(tf_list,paste0('gene',1:(nrow(exp_data)-length(tf_list))))
 colnames(exp_data) <- paste0('condition_',1:ncol(exp_data))
-se <- SummarizedExperiment(assays=list(counts=exp_data))
+se <- SummarizedExperiment::SummarizedExperiment(assays=list(counts=exp_data))
 gnet_result <- gnet(se,tf_list)
 }
