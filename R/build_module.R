@@ -83,18 +83,18 @@ get_leaf_labels <- function(group_table,format_plot=FALSE){
 #'  which is C++ version but gives flexibility of customization of R functions.
 #' @param X A n by p matrix as input.
 #' @param Y A n by q matrix as response.
-#' @param max_depth Maximum partition level in the tree.
+#' @param max_depth Maximum depth of the tree.
 #' @param cor_cutoff Cutoff for within group Pearson correlation coefficient, if all data belong to a node have
 #'  average correlation greater or equal to this, the node would not split anymore.
 #' @param min_divide_size Minimum number of data belong to a node allowed for further split of the node.
 #' 
-#' @return A matrix for sample informatrion for each partition level. First column is feature index used by the 
+#' @return A matrix for sample informatrion for each tree level. First column is feature index used by the 
 #' node and second is the value used to split, 
 #' the rest of the columns are the split of sample: 0 means less or equal, 1 means greater and -1 means the sample 
 #' does not belong to this node.
 #' @examples
-#' build_moduleR(X = matrix(rnorm(10*10),10,10), Y = matrix(rnorm(10*10),10,10),
-#'               max_depth=2,cor_cutoff=0.9,min_divide_size=3)
+#' build_moduleR(X = matrix(rnorm(5*10),5,10), Y = matrix(rnorm(5*10),5,10),
+#'               max_depth=3,cor_cutoff=0.9,min_divide_size=3)
 #' @export
 build_moduleR <- function(X,Y,max_depth,cor_cutoff,min_divide_size){
   feature_remaining <- seq_len(ncol(X))
@@ -143,7 +143,7 @@ build_moduleR <- function(X,Y,max_depth,cor_cutoff,min_divide_size){
   return(group_table)
 }
 
-assign_tf <- function(regulator_data,gene_data,gene_group_table,min_group_size,max_depth,
+assign_regul <- function(regulator_data,gene_data,gene_group_table,min_group_size,max_depth,
                       cor_cutoff,min_divide_size){
   X <- t(regulator_data)
   group_labels <- unique(gene_group_table)
@@ -248,7 +248,7 @@ run_gnet <- function(gene_data,regulator_data,init_method = 'boosting',init_grou
   message('Building module networks...')
   for (i in seq_len(max_iter)) {
     message(paste('iteration',i))
-    assign_reg_names <- assign_tf(regulator_data,gene_data,gene_group_table,min_group_size,
+    assign_reg_names <- assign_regul(regulator_data,gene_data,gene_group_table,min_group_size,
                                   max_depth,cor_cutoff,min_divide_size)
     gene_group_table_new <- assign_gene(gene_data,assign_reg_names[[2]])
     if(all(length(gene_group_table)==length(gene_group_table_new)) &&
@@ -274,14 +274,14 @@ run_gnet <- function(gene_data,regulator_data,init_method = 'boosting',init_grou
 
 #' Run GNET2
 #' 
-#' Build regulation modules by iteratively perform TF assigning and Gene assigning, until the assignment of 
-#' genes did not change, or max number of iterations reached.
+#' Build regulation modules by iteratively perform regulator assigning and Gene assigning, until the 
+#' assignment of genes did not change, or max number of iterations reached.
 #' @param input A SummarizedExperiment object, or a p by n matrix of expression data of p genes and n samples,
 #'  for example log2 RPKM from RNA-Seq.
 #' @param reg_names A list of potential upstream regulators names, for example a list of known transcription factors.
 #' @param init_method Cluster initialization, can be "boosting" or "kmeans", default is using "boosting".
 #' @param init_group_num Initial number of function clusters used by the algorithm.
-#' @param max_depth max_depth Maximum partition level in the tree.
+#' @param max_depth max_depth Maximum depth of the tree.
 #' @param cor_cutoff  Cutoff for within group Pearson correlation coefficient, if all data belong to a node have
 #'  average correlation greater or equal to this, the node would not split anymore.
 #' @param min_divide_size Minimum number of data belong to a node allowed for further split of the node.
@@ -292,12 +292,14 @@ run_gnet <- function(gene_data,regulator_data,init_method = 'boosting',init_grou
 #' structure and final assigned group of each gene.
 #' @examples
 #' set.seed(1)
+#' init_group_num = 10
+#' init_method = 'boosting'
 #' exp_data <- matrix(rnorm(100*12),100,12)
-#' tf_list <- paste0('TF',1:10)
-#' rownames(exp_data) <- c(tf_list,paste0('gene',1:(nrow(exp_data)-length(tf_list))))
+#' reg_names <- paste0('TF',1:10)
+#' rownames(exp_data) <- c(reg_names,paste0('gene',1:(nrow(exp_data)-length(reg_names))))
 #' colnames(exp_data) <- paste0('condition_',1:ncol(exp_data))
 #' se <- SummarizedExperiment::SummarizedExperiment(assays=list(counts=exp_data))
-#' gnet_result <- gnet(se,tf_list)
+#' gnet_result <- gnet(se,reg_names,init_method,init_group_num)
 #' @export
 gnet <- function(input,reg_names,init_method= 'boosting',init_group_num = 4,max_depth = 3,
                  cor_cutoff = 0.9,min_divide_size = 3,min_group_size = 2,max_iter = 5){

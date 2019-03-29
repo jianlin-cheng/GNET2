@@ -92,23 +92,26 @@ IntegerVector find_new_split(NumericMatrix X, NumericMatrix Y,IntegerVector grou
 //' Fit a regression tree based on Gaussian Likelihood score.
 //' @param X A n by p matrix as input.
 //' @param Y A n by q matrix as response.
-//' @param max_partition_level Maximum partition level in the tree.
-//' @param cor_cutoff Cutoff for within group Pearson correlation coefficient, if all data belong to a node have average correlation greater or equal to this, the node would not split anymore.
+//' @param max_depth Maximum depth of the tree.
+//' @param cor_cutoff Cutoff for within group Pearson correlation coefficient, if all data belong to a node 
+//' have average correlation greater or equal to this, the node would not split anymore.
 //' @param min_divide_size Minimum number of data belong to a node allowed for further split of the node.
 //' 
-//' @return A matrix for sample informatrion for each partition level. First column is feature index used by the node and second is the value used to split, the rest of the columns are the split of sample: 0 means less or equal, 1 means greater and -1 means the sample does not belong to this node.
+//' @return A matrix for sample informatrion for each partition level. First column is feature index used 
+//' by the node and second is the value used to split, the rest of the columns are the split of sample: 0 means 
+//' less or equal, 1 means greater and -1 means the sample does not belong to this node.
 //' @examples
-//' build_module(X = matrix(rnorm(50*100),50,100), Y = matrix(rnorm(50*200),50,200),
-//'               max_partition_level=4,cor_cutoff=0.9,min_divide_size=3)
+//' build_moduleR(X = matrix(rnorm(5*10),5,10), Y = matrix(rnorm(5*10),5,10),
+//'               max_depth=3,cor_cutoff=0.9,min_divide_size=3)
 //' @export
 // [[Rcpp::export]]
-NumericMatrix build_module(NumericMatrix X,NumericMatrix Y, int max_partition_level,double cor_cutoff, int min_divide_size) {
+NumericMatrix build_module(NumericMatrix X,NumericMatrix Y, int max_depth,double cor_cutoff, int min_divide_size) {
   LogicalVector feature_remaining(X.ncol());
   int feature_num = 0;
   IntegerVector subgroup_indicator = rep(0,X.nrow());
-  NumericMatrix group_table(max_partition_level,X.nrow()+1);
+  NumericMatrix group_table(max_depth,X.nrow()+1);
   IntegerVector groups(X.nrow());
-  while (feature_num < max_partition_level && is_false(all(feature_remaining == TRUE)) && is_false(all(groups == -1))){
+  while (feature_num < max_depth && is_false(all(feature_remaining == TRUE)) && is_false(all(groups == -1))){
     IntegerVector new_group_table_row = find_new_split(X, Y, groups, feature_remaining);
     group_table(feature_num,_) = new_group_table_row;
     feature_num++;

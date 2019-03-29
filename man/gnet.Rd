@@ -18,7 +18,7 @@ for example log2 RPKM from RNA-Seq.}
 
 \item{init_group_num}{Initial number of function clusters used by the algorithm.}
 
-\item{max_depth}{max_depth Maximum partition level in the tree.}
+\item{max_depth}{max_depth Maximum depth of the tree.}
 
 \item{cor_cutoff}{Cutoff for within group Pearson correlation coefficient, if all data belong to a node have
 average correlation greater or equal to this, the node would not split anymore.}
@@ -34,15 +34,17 @@ A list of expression data of genes, expression data of regulators, within group 
 structure and final assigned group of each gene.
 }
 \description{
-Build regulation modules by iteratively perform TF assigning and Gene assigning, until the assignment of 
-genes did not change, or max number of iterations reached.
+Build regulation modules by iteratively perform regulator assigning and Gene assigning, until the 
+assignment of genes did not change, or max number of iterations reached.
 }
 \examples{
 set.seed(1)
+init_group_num = 10
+init_method = 'boosting'
 exp_data <- matrix(rnorm(100*12),100,12)
-tf_list <- paste0('TF',1:10)
-rownames(exp_data) <- c(tf_list,paste0('gene',1:(nrow(exp_data)-length(tf_list))))
+reg_names <- paste0('TF',1:10)
+rownames(exp_data) <- c(reg_names,paste0('gene',1:(nrow(exp_data)-length(reg_names))))
 colnames(exp_data) <- paste0('condition_',1:ncol(exp_data))
 se <- SummarizedExperiment::SummarizedExperiment(assays=list(counts=exp_data))
-gnet_result <- gnet(se,tf_list)
+gnet_result <- gnet(se,reg_names,init_method,init_group_num)
 }
