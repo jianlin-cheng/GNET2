@@ -16,7 +16,7 @@
 #' less or equal, 1 means greater and -1 means the sample does not belong to this node.
 #' @examples
 #' build_moduleR(X = matrix(rnorm(5*10),5,10), Y = matrix(rnorm(5*10),5,10),
-#'               max_depth=3,cor_cutoff=0.9,min_divide_size=3)
+#'                          max_depth=3,cor_cutoff=0.9,min_divide_size=3)
 #' @export
 build_module <- function(X, Y, max_depth, cor_cutoff, min_divide_size) {
     .Call('_GNET2_build_module', PACKAGE = 'GNET2', X, Y, max_depth, cor_cutoff, min_divide_size)

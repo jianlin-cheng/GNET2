@@ -28,5 +28,5 @@ Fit a regression tree based on Gaussian Likelihood score.
 }
 \examples{
 build_moduleR(X = matrix(rnorm(5*10),5,10), Y = matrix(rnorm(5*10),5,10),
-              max_depth=3,cor_cutoff=0.9,min_divide_size=3)
+                         max_depth=3,cor_cutoff=0.9,min_divide_size=3)
 }
