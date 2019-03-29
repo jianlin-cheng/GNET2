@@ -1,7 +1,7 @@
 Package: GNET2
 Type: Package
 Title: GNET2: Constructing module pathway networks from expression data
-Version: 0.99.4
+Version: 0.99.5
 Author: Chen Chen, Jie Hou and Jianlin Cheng
 Maintainer: Chen Chen <ccm3x@mail.missouri.edu>
 Description: Cluster genes to functional groups with E-M process.
