@@ -56,7 +56,7 @@ plot_tree <- function(gnet_result,group_idx){
   leaf_idx <- 0
   from_list <- to_list <- edge_labels <- c()
   for(i in seq_len((nrow(tree_i)-1))){
-    for(j in 0:1){
+    for(j in seq_len(2)-1){
       found_node <- FALSE
       split_i_j <- tree_i[i,3:ncol(tree_i)]==j
       for (k in (i+1):nrow(tree_i)) {

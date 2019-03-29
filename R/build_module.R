@@ -69,7 +69,7 @@ get_leaf_labels <- function(group_table,format_plot=FALSE){
   next_label <- 0
   for(i in seq_len(nrow(group_table))){
     current_label <- group_table[i,]
-    for(j in 0:1){
+    for(j in seq_len(2)-1){
       leaf_label[current_label==j] <- next_label
       next_label <- next_label+1
     }
@@ -128,7 +128,7 @@ build_moduleR <- function(X,Y,max_depth,cor_cutoff,min_divide_size){
     subgroup_indicator_new <- get_leaf_labels(group_table)
     subgroup_indicator_new[subgroup_indicator==-1] <- (-1)
     subgroup_indicator <- subgroup_indicator_new
-    for (i in 0:1){
+    for (i in seq_len(2)-1){
       new_divide_i <- subgroup_labels==i
       if (sum(new_divide_i) <= min_divide_size){
         subgroup_indicator[new_divide_i] <- (-1)
