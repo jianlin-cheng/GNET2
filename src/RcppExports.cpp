@@ -6,17 +6,17 @@
 using namespace Rcpp;
 
 // build_module
-NumericMatrix build_module(NumericMatrix X, NumericMatrix Y, int max_partition_level, double cor_cutoff, int min_divide_size);
-RcppExport SEXP _GNET2_build_module(SEXP XSEXP, SEXP YSEXP, SEXP max_partition_levelSEXP, SEXP cor_cutoffSEXP, SEXP min_divide_sizeSEXP) {
+NumericMatrix build_module(NumericMatrix X, NumericMatrix Y, int max_depth, double cor_cutoff, int min_divide_size);
+RcppExport SEXP _GNET2_build_module(SEXP XSEXP, SEXP YSEXP, SEXP max_depthSEXP, SEXP cor_cutoffSEXP, SEXP min_divide_sizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericMatrix >::type X(XSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type Y(YSEXP);
-    Rcpp::traits::input_parameter< int >::type max_partition_level(max_partition_levelSEXP);
+    Rcpp::traits::input_parameter< int >::type max_depth(max_depthSEXP);
     Rcpp::traits::input_parameter< double >::type cor_cutoff(cor_cutoffSEXP);
     Rcpp::traits::input_parameter< int >::type min_divide_size(min_divide_sizeSEXP);
-    rcpp_result_gen = Rcpp::wrap(build_module(X, Y, max_partition_level, cor_cutoff, min_divide_size));
+    rcpp_result_gen = Rcpp::wrap(build_module(X, Y, max_depth, cor_cutoff, min_divide_size));
     return rcpp_result_gen;
 END_RCPP
 }
