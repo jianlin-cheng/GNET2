@@ -9,7 +9,7 @@ plot_tree(gnet_result, group_idx)
 \arguments{
 \item{gnet_result}{Results returned by gnet().}
 
-\item{group_idx}{Index of the module..}
+\item{group_idx}{Index of the module.}
 }
 \value{
 None

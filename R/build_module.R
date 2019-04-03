@@ -4,7 +4,7 @@
 #' @param labels A vector of length n, indicating the group of rows.
 #' @return The sum of log likelihood score of each group on each column.
 #' @examples
-#' calc_likelihood_score(x = matrix(rnorm(50*100),50,100), labels = c(rep(1,20),rep(2,30)))
+#' calc_likelihood_score(x = matrix(rnorm(5*10),5,10), labels = c(rep(1,2),rep(2,3)))
 #' @export
 calc_likelihood_score <- function(x,labels){
     score_total <- 0
@@ -47,7 +47,7 @@ calc_correlation <- function(x){
 #' @param labels A vector of length n, indicating the group of rows.
 #' @return An array of Pearson correlation coefficient for each row, rows belong to the same group have same values.
 #' @examples
-#' get_correlation_list(x = matrix(rnorm(50*100),50,100), labels = c(rep(1,20),rep(2,30)))
+#' get_correlation_list(x = matrix(rnorm(5*10),5,10), labels = c(rep(1,2),rep(2,3)))
 #' @export
 get_correlation_list <- function(x,labels){
     cor_list <- rep(0,length(labels))
@@ -190,7 +190,7 @@ assign_gene <- function(gene_data,reg_group_table){
 #' 
 #' @return The index of the data point which is the knee.
 #' @examples
-#' kneepointDetection(sort(c(runif(20,1,3),c(runif(20,5,10))),TRUE))
+#' kneepointDetection(sort(c(runif(10,1,3),c(runif(10,5,10))),TRUE))
 #' @export
 kneepointDetection <- function (vect){
     n <- length(vect)

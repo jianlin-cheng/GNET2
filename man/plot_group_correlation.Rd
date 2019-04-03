@@ -18,6 +18,6 @@ determined which clustered are kept for further analysis.
 }
 \examples{
 set.seed(1)
-gnet_result <- list('group_score'=c(runif(20,1,3),c(runif(20,5,10))))
+gnet_result <- list('group_score'=c(runif(10,1,3),c(runif(10,5,3))))
 group_keep <- plot_group_correlation(gnet_result)
 }
