@@ -16,5 +16,5 @@ The index of the data point which is the knee.
 Detect the knee point of the array.
 }
 \examples{
-kneepointDetection(sort(rnorm(100),TRUE))
+kneepointDetection(sort(c(runif(10,1,3),c(runif(10,5,10))),TRUE))
 }

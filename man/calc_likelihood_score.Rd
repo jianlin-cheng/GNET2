@@ -18,5 +18,5 @@ The sum of log likelihood score of each group on each column.
 Calculate Gaussian Likelihood score.
 }
 \examples{
-calc_likelihood_score(x = matrix(rnorm(50*100),50,100), labels = c(rep(1,20),rep(2,30)))
+calc_likelihood_score(x = matrix(rnorm(5*10),5,10), labels = c(rep(1,2),rep(2,3)))
 }

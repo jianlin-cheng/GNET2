@@ -1,7 +1,7 @@
 Package: GNET2
 Type: Package
 Title: GNET2: Constructing module pathway networks from expression data
-Version: 0.99.5
+Version: 0.99.11
 Author: Chen Chen, Jie Hou and Jianlin Cheng
 Maintainer: Chen Chen <ccm3x@mail.missouri.edu>
 Description: Cluster genes to functional groups with E-M process.
@@ -13,7 +13,7 @@ LinkingTo: Rcpp
 Depends:
     R (>= 3.6),
 Imports:
-    ggplot2,xgboost,Rcpp,reshape2,grid,DiagrammeR,methods,stats,graphics,SummarizedExperiment
+    ggplot2,xgboost,Rcpp,reshape2,grid,DiagrammeR,methods,stats,matrixStats,graphics,SummarizedExperiment
 RoxygenNote: 6.1.1
 Suggests: 
     knitr,

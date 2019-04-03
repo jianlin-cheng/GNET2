@@ -2,7 +2,7 @@
 % Please edit documentation in R/build_module.R
 \name{build_moduleR}
 \alias{build_moduleR}
-\title{R code version of build regression tree.}
+\title{Build regression tree.}
 \usage{
 build_moduleR(X, Y, max_depth, cor_cutoff, min_divide_size)
 }
@@ -25,8 +25,7 @@ the rest of the columns are the split of sample: 0 means less or equal, 1 means 
 means the sample does not belong to this node.
 }
 \description{
-R version of build regression tree based on Gaussian Likelihood score. Runs slower than the build_module() 
-which is C++ version but gives flexibility of customization of R functions.
+Build regression tree based on Gaussian Likelihood score.
 }
 \examples{
 build_moduleR(X = matrix(rnorm(5*10),5,10), Y = matrix(rnorm(5*10),5,10),

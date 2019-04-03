@@ -18,5 +18,5 @@ An array of Pearson correlation coefficient for each row, rows belong to the sam
 Calculate Pearson correlation coefficient within each group.
 }
 \examples{
-get_correlation_list(x = matrix(rnorm(50*100),50,100), labels = c(rep(1,20),rep(2,30)))
+get_correlation_list(x = matrix(rnorm(5*10),5,10), labels = c(rep(1,2),rep(2,3)))
 }

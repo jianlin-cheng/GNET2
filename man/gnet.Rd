@@ -39,10 +39,10 @@ assignment of genes did not change, or max number of iterations reached.
 }
 \examples{
 set.seed(1)
-init_group_num = 10
+init_group_num = 8
 init_method = 'boosting'
-exp_data <- matrix(rnorm(100*12),100,12)
-reg_names <- paste0('TF',1:10)
+exp_data <- matrix(rnorm(50*10),50,10)
+reg_names <- paste0('TF',1:5)
 rownames(exp_data) <- c(reg_names,paste0('gene',1:(nrow(exp_data)-length(reg_names))))
 colnames(exp_data) <- paste0('condition_',1:ncol(exp_data))
 se <- SummarizedExperiment::SummarizedExperiment(assays=list(counts=exp_data))
