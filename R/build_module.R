@@ -173,17 +173,6 @@ assign_regul <- function(regulator_data,gene_data,gene_group_table,min_group_siz
     return(list(group_table,reg_group_table))
 }
 
-#' Assign genes to groups.
-#' 
-#' Assign genes to groups that has highest log likelihood based on the grouping of samples.
-#' @param gene_data A n by p matrix of expression data with rows for genes and columns for samples.
-#' @param reg_group_table A g by p matrix with i-th row for the grouping of samples of i-th group.
-#' 
-#' @return A list of length n, which are the indices of groups for the genes.
-#' @examples
-#' reg_group_table=matrix(c(rep(0,3),rep(1,9),rep(0,9),rep(1,3)),nrow=2,byrow=TRUE)
-#' assign_gene(gene_data = matrix(rnorm(100*12),100,12),reg_group_table=reg_group_table)
-#' @export
 assign_gene <- function(gene_data,reg_group_table){
     gene_group_table <- rep(-1,nrow(gene_data))
     for(gene_idx in seq_len(nrow(gene_data))){
