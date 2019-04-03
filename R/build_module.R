@@ -190,28 +190,24 @@ assign_gene <- function(gene_data,reg_group_table){
 #' 
 #' @return The index of the data point which is the knee.
 #' @examples
-#' kneepointDetection(sort(rnorm(100),TRUE))
+#' kneepointDetection(sort(c(runif(20,1,3),c(runif(20,5,10))),TRUE))
 #' @export
-kneepointDetection <-function (vect){
+kneepointDetection <- function (vect){
     n <- length(vect)
-    Vect <- vect
-    a <- data.frame('V1'=seq_len(n), 'V2'=Vect[seq_len(n)])
-    l <- lm(a[, 2] ~ a[, 1], data = a)
     MinError <- 1e+08
     MinIndex <- 1
     for (i in 2:(n - 2)){
-        a <- data.frame('V1'=seq_len(i), 'V2'=Vect[seq_len(i)])
+        a <- data.frame('V1'=seq_len(i), 'V2'=vect[seq_len(i)])
         l1 <- lm(a[, 2] ~ a[, 1], data = a)
-        e1 <- sum(abs(1 - a[, 2]))
-        a <- data.frame('V1'=(i + 1):n, 'V2'=Vect[(i + 1):n])
-        l <- lm(a[, 2] ~ a[, 1], data = a)
-        l2 <- l
-        e2 <- sum(abs(l$residuals))
+        e1 <- sum(abs(l1$residuals))
+        a <- data.frame('V1'=(i + 1):n, 'V2'=vect[(i + 1):n])
+        l2 <- lm(a[, 2] ~ a[, 1], data = a)
+        e2 <- sum(abs(l2$residuals))
         Error <- e1 + e2
         if (MinError > Error){
             MinError <- Error
+            MinIndex <- i
         }
-        MinIndex <- i
     }
     return(MinIndex)
 }

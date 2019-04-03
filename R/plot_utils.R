@@ -196,14 +196,7 @@ plot_gene_group <- function(gnet_result,group_idx){
 #' @return A list of indices of the data point with correlation higher than the knee point.
 #' @examples
 #' set.seed(1)
-#' init_group_num = 10
-#' init_method = 'boosting'
-#' exp_data <- matrix(rnorm(100*12),100,12)
-#' reg_names <- paste0('TF',1:10)
-#' rownames(exp_data) <- c(reg_names,paste0('gene',1:(nrow(exp_data)-length(reg_names))))
-#' colnames(exp_data) <- paste0('condition_',1:ncol(exp_data))
-#' se <- SummarizedExperiment::SummarizedExperiment(assays=list(counts=exp_data))
-#' gnet_result <- gnet(se,reg_names,init_method,init_group_num)
+#' gnet_result <- list('group_score'=c(runif(20,1,3),c(runif(20,5,10))))
 #' group_keep <- plot_group_correlation(gnet_result)
 #' @export
 plot_group_correlation <- function(gnet_result){
