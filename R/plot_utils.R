@@ -26,7 +26,7 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 #' 
 #' Plot the regression tree given the index of a module.
 #' @param gnet_result Results returned by gnet().
-#' @param group_idx Index of the module..
+#' @param group_idx Index of the module.
 #' 
 #' @return None
 #' @examples

@@ -158,7 +158,7 @@ assign_regul <- function(regulator_data,gene_data,gene_group_table,min_group_siz
         gene_idx <- gene_group_table == group_idx
         if (sum(gene_idx) >= min_group_size){
             Y <- t(gene_data[gene_idx,,drop=FALSE])
-            group_table_i <- build_moduleR(X,Y,max_depth,cor_cutoff,min_divide_size)
+            group_table_i <- build_module(X,Y,max_depth,cor_cutoff,min_divide_size)
             group_table_i <- group_table_i[apply(group_table_i, 1, function(x)(sum(x!=0)))!=0,]
             reg_group_table[i+1,] <- get_leaf_labels(group_table_i)
             group_table_end <- group_table_start+nrow(group_table_i)-1
