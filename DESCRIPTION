@@ -13,7 +13,7 @@ LinkingTo: Rcpp
 Depends:
     R (>= 3.6),
 Imports:
-    ggplot2,xgboost,Rcpp,reshape2,grid,DiagrammeR,methods,stats,graphics,SummarizedExperiment
+    ggplot2,xgboost,Rcpp,reshape2,grid,DiagrammeR,methods,stats,matrixStats,graphics,SummarizedExperiment
 RoxygenNote: 6.1.1
 Suggests: 
     knitr,

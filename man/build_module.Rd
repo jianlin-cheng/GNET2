@@ -24,9 +24,10 @@ by the node and second is the value used to split, the rest of the columns are t
 less or equal, 1 means greater and -1 means the sample does not belong to this node.
 }
 \description{
-Fit a regression tree based on Gaussian Likelihood score.
+Fit a regression tree based on Gaussian Likelihood score. Provided in case the best split
+is not applicable for R dnorm() function.
 }
 \examples{
-build_moduleR(X = matrix(rnorm(5*10),5,10), Y = matrix(rnorm(5*10),5,10),
+build_module(X = matrix(rnorm(5*10),5,10), Y = matrix(rnorm(5*10),5,10),
                          max_depth=3,cor_cutoff=0.9,min_divide_size=3)
 }

@@ -46,7 +46,7 @@ plot_tree <- function(gnet_result,group_idx){
     gene_data <- gnet_result$gene_data
     reg_group_table <- gnet_result$reg_group_table
     gene_group_table <- gnet_result$gene_group_table
-    tree_i <- reg_group_table[reg_group_table[,1]==group_idx,]
+    tree_i <- reg_group_table[reg_group_table[,1]==group_idx,,drop=FALSE]
     label_list <- c()
     for(i in seq_len(nrow(tree_i))){
         coverage_i <- sum(tree_i[i,3:ncol(tree_i)]>=0)
@@ -119,14 +119,14 @@ plot_gene_group <- function(gnet_result,group_idx){
     regulator_data <- gnet_result$regulator_data
     reg_group_table <- gnet_result$reg_group_table
     gene_group_table <- gnet_result$gene_group_table
-    exp_data1 <- gene_data[gene_group_table$gene[gene_group_table$group==group_idx],]
+    exp_data1 <- gene_data[gene_group_table$gene[gene_group_table$group==group_idx],,drop=FALSE]
     regulator_data1 <- regulator_data[reg_group_table[reg_group_table[,1]==group_idx,2]+1,]
     group_table1 <- reg_group_table[reg_group_table[,1]==group_idx,3:ncol(reg_group_table)]
     leaf_labels <- get_leaf_labels(group_table1,format_plot = TRUE)
     row_order <- order(leaf_labels)
-    group_table2 <- group_table1[,row_order]
-    regulator_data2 <- regulator_data1[,row_order]
-    exp_data2 <- exp_data1[,row_order]
+    group_table2 <- group_table1[,row_order,drop=FALSE]
+    regulator_data2 <- regulator_data1[,row_order,drop=FALSE]
+    exp_data2 <- exp_data1[,row_order,drop=FALSE]
     test_regulators_names <- rownames(regulator_data2)
     layout=matrix(c(seq_len(length(test_regulators_names)),rep(length(test_regulators_names)+1,
                                                                length(test_regulators_names)*2)),ncol=1)

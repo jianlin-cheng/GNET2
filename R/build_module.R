@@ -10,12 +10,11 @@ calc_likelihood_score <- function(x,labels){
     score_total <- 0
     for(i in unique(labels)){
         if(sum(labels==i) > 1){
-            x_i <- x[labels==i,]
-            for(j in seq_len(ncol(x_i))){
-                x_i_j <- x_i[,j]
-                density_scores <- dnorm(x_i_j,mean = mean(x_i_j),sd = sd(x_i_j),log = TRUE)
-                score_total <- score_total+sum(density_scores)
-            }
+            x_i <- x[labels==i,,drop=FALSE]
+            mean_x_i <- rep(colMeans(x_i), each = nrow(x_i))
+            sd_x_i = rep(colSds(x_i), each = nrow(x_i))
+            density_scores <- dnorm(x_i, mean_x_i, sd_x_i, log = TRUE)
+            score_total <- score_total + sum(density_scores)
         }
     }
     return(score_total)
@@ -56,7 +55,7 @@ get_correlation_list <- function(x,labels){
         if(sum(labels==i)==1){
             cor_list[labels==i] <- 0
         }else{
-            cor_list[labels==i] <- calc_correlation(x[,labels==i])
+            cor_list[labels==i] <- calc_correlation(x[,labels==i,drop=FALSE])
         }
     }
     return(cor_list)
@@ -78,10 +77,9 @@ get_leaf_labels <- function(group_table,format_plot=FALSE){
     return(leaf_label)
 }
 
-#' R code version of build regression tree.
+#' Build regression tree.
 #'
-#' R version of build regression tree based on Gaussian Likelihood score. Runs slower than the build_module() 
-#' which is C++ version but gives flexibility of customization of R functions.
+#' Build regression tree based on Gaussian Likelihood score.
 #' @param X A n by p matrix as input.
 #' @param Y A n by q matrix as response.
 #' @param max_depth Maximum depth of the tree.
@@ -102,13 +100,13 @@ build_moduleR <- function(X,Y,max_depth,cor_cutoff,min_divide_size){
     feature_num <- 0
     subgroup_indicator <- rep(0,nrow(X))
     groups <- c(0)
-    group_table <- matrix(0, nrow = 0, ncol = nrow(X)+1)
+    group_table <- matrix(-1, nrow = max_depth, ncol = nrow(X)+1)
     while (feature_num < max_depth & length(groups)>0 & length(feature_remaining)>0){
         best_score <- (-(10^6))
         best_feature <- (-1)
         for(i in groups){
             current_split_group <- subgroup_indicator == i
-            y_current_split <- Y[current_split_group,]
+            y_current_split <- Y[current_split_group,,drop=FALSE]
             for (j in feature_remaining){
                 feature_vals <- X[current_split_group,j]
                 divide_vals <- feature_vals[feature_vals != max(feature_vals)]
@@ -125,7 +123,8 @@ build_moduleR <- function(X,Y,max_depth,cor_cutoff,min_divide_size){
                 }
             }
         }
-        group_table <- rbind(group_table,c(best_feature-1,subgroup_labels))
+        feature_num <- feature_num+1
+        group_table[feature_num,] <- c(best_feature-1,subgroup_labels)
         subgroup_indicator_new <- get_leaf_labels(group_table)
         subgroup_indicator_new[subgroup_indicator==-1] <- (-1)
         subgroup_indicator <- subgroup_indicator_new
@@ -139,8 +138,9 @@ build_moduleR <- function(X,Y,max_depth,cor_cutoff,min_divide_size){
         }
         groups <- unique(subgroup_indicator[subgroup_indicator!=-1])
         feature_remaining <- feature_remaining[feature_remaining!=best_feature]
-        feature_num <- feature_num+1
     }
+    # remove unused rows
+    group_table <- group_table[apply(group_table, 1, function(x)sum(x!=-1))>0,]
     return(group_table)
 }
 
@@ -149,23 +149,41 @@ assign_regul <- function(regulator_data,gene_data,gene_group_table,min_group_siz
     X <- t(regulator_data)
     group_labels <- unique(gene_group_table)
     group_labels <- group_labels[group_labels!=-1]
-    reg_group_table <- matrix(0,nrow = 0,ncol = ncol(regulator_data))
-    group_table <- matrix(0,nrow = 0,ncol = ncol(regulator_data)+2)
+    reg_group_table <- matrix(-1,nrow = max(gene_group_table)+1,ncol = ncol(regulator_data))
+    group_table <- matrix(-1,nrow = max_depth*(max(gene_group_table)+1),
+                          ncol = ncol(regulator_data)+2)
     i <- 0
+    group_table_start <- 1
     for (group_idx in group_labels){
         gene_idx <- gene_group_table == group_idx
         if (sum(gene_idx) >= min_group_size){
-            Y <- t(gene_data[gene_idx,])
-            group_table_i <- build_module(X,Y,max_depth,cor_cutoff,min_divide_size)
+            Y <- t(gene_data[gene_idx,,drop=FALSE])
+            group_table_i <- build_moduleR(X,Y,max_depth,cor_cutoff,min_divide_size)
             group_table_i <- group_table_i[apply(group_table_i, 1, function(x)(sum(x!=0)))!=0,]
-            reg_group_table <- rbind(reg_group_table,get_leaf_labels(group_table_i))
-            group_table <- rbind(group_table,cbind(i,group_table_i))
+            reg_group_table[i+1,] <- get_leaf_labels(group_table_i)
+            group_table_end <- group_table_start+nrow(group_table_i)-1
+            group_table[group_table_start:group_table_end,2:ncol(group_table)] <- group_table_i
+            group_table[group_table_start:group_table_end,1] <- i
             i <- i+1
+            group_table_start <- group_table_end+1
         }
     }
+    # remove unused rows
+    group_table <- group_table[apply(group_table, 1, function(x)sum(x!=-1))>0,]
     return(list(group_table,reg_group_table))
 }
 
+#' Assign genes to groups.
+#' 
+#' Assign genes to groups that has highest log likelihood based on the grouping of samples.
+#' @param gene_data A n by p matrix of expression data with rows for genes and columns for samples.
+#' @param reg_group_table A g by p matrix with i-th row for the grouping of samples of i-th group.
+#' 
+#' @return A list of length n, which are the indices of groups for the genes.
+#' @examples
+#' reg_group_table=matrix(c(rep(0,3),rep(1,9),rep(0,9),rep(1,3)),nrow=2,byrow=TRUE)
+#' assign_gene(gene_data = matrix(rnorm(100*12),100,12),reg_group_table=reg_group_table)
+#' @export
 assign_gene <- function(gene_data,reg_group_table){
     gene_group_table <- rep(-1,nrow(gene_data))
     for(gene_idx in seq_len(nrow(gene_data))){
@@ -188,15 +206,15 @@ assign_gene <- function(gene_data,reg_group_table){
 kneepointDetection <-function (vect){
     n <- length(vect)
     Vect <- vect
-    a <- as.data.frame(cbind(seq_len(n), Vect[seq_len(n)]))
+    a <- data.frame('V1'=seq_len(n), 'V2'=Vect[seq_len(n)])
     l <- lm(a[, 2] ~ a[, 1], data = a)
     MinError <- 1e+08
     MinIndex <- 1
     for (i in 2:(n - 2)){
-        a <- as.data.frame(cbind(seq_len(i), Vect[seq_len(i)]))
+        a <- data.frame('V1'=seq_len(i), 'V2'=Vect[seq_len(i)])
         l1 <- lm(a[, 2] ~ a[, 1], data = a)
         e1 <- sum(abs(1 - a[, 2]))
-        a <- as.data.frame(cbind((i + 1):n, Vect[(i + 1):n]))
+        a <- data.frame('V1'=(i + 1):n, 'V2'=Vect[(i + 1):n])
         l <- lm(a[, 2] ~ a[, 1], data = a)
         l2 <- l
         e2 <- sum(abs(l$residuals))
@@ -249,7 +267,7 @@ run_gnet <- function(gene_data,regulator_data,init_method = 'boosting',init_grou
                                              init_group_num,init_method)
     message('Building module networks...')
     for (i in seq_len(max_iter)) {
-        message(paste('iteration',i))
+        message('Iteration ',i)
         assign_reg_names <- assign_regul(regulator_data,gene_data,gene_group_table,
                                          min_group_size,max_depth,cor_cutoff,min_divide_size)
         gene_group_table_new <- assign_gene(gene_data,assign_reg_names[[2]])
@@ -262,14 +280,9 @@ run_gnet <- function(gene_data,regulator_data,init_method = 'boosting',init_grou
     message('Done.')
     tree_table_all <- assign_reg_names[[1]]
     colnames(tree_table_all) <- c('group','feature',colnames(gene_data))
-
-    gene_list_all <- NULL
-    groups_unique <- unique(gene_group_table)
-    for (i in seq_len(length(groups_unique))) {
-        gene_list_all <- rbind(gene_list_all,
-                               cbind.data.frame('gene'=rownames(gene_data)[gene_group_table==groups_unique[i]],
-                                                'group'=i-1,stringsAsFactors=FALSE))
-    }
+    group_order <- order(gene_group_table)
+    gene_list_all <- data.frame('gene'  = rownames(gene_data)[group_order],
+                                'group' = gene_group_table[group_order])
     return(list('reg_group_table'=tree_table_all,'gene_group_table'=gene_list_all))
 }
 
@@ -307,15 +320,15 @@ gnet <- function(input,reg_names,init_method= 'boosting',init_group_num = 4,max_
     if(is(input,class2 = "SummarizedExperiment")){
         input <- assay(input)
     }
-    gene_data <- input[!rownames(input)%in%reg_names,]
-    regulator_data <- input[reg_names,]
+    gene_data <- input[!rownames(input)%in%reg_names,,drop=FALSE]
+    regulator_data <- input[reg_names,,drop=FALSE]
     result_all <- run_gnet(gene_data,regulator_data,init_method,init_group_num,max_depth,
                                                  cor_cutoff,min_divide_size,min_group_size,max_iter)
     reg_group_table <- result_all[[1]]
     gene_group_table <- result_all[[2]]
     avg_cor_list <- rep(0,length(unique(gene_group_table$group)))
     for(i in seq_len(length(avg_cor_list))){
-        cor_m <- cor(t(gene_data[gene_group_table$group==(i-1),]))
+        cor_m <- cor(t(gene_data[gene_group_table$group==(i-1),,drop=FALSE]))
         avg_cor_list[i] <- mean(cor_m[upper.tri(cor_m)])
     }
     return(list('gene_data' = gene_data,'regulator_data' = regulator_data,'group_score' = avg_cor_list,
