@@ -21,4 +21,4 @@ Suggests:
 VignetteBuilder: knitr
 biocViews: GeneExpression, Regression, Network, NetworkInference, Software
 URL: https://github.com/chrischen1/GNET2
-BugReports: https://github.com/StoreyLab/edge/issues
+BugReports:https://github.com/chrischen1/GNET2/issues
