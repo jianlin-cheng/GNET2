@@ -14,9 +14,9 @@ Checkout the [Lab Page](http://calla.rnet.missouri.edu/cheng/).
 ## Install
 To install, open R and type:
 ```
-install.packages("devtools")
-library("devtools")
-install_github("chrischen1/GNET2")
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("GNET2", version = "3.9")
 ```
 
 Vignette can be viewed with following code:
