@@ -2,6 +2,7 @@ useDynLib(GNET2)
 
 export(build_module)
 export(build_moduleR)
+export(build_moduleR_heuristic)
 export(calc_likelihood_score)
 export(get_correlation_list)
 export(gnet)

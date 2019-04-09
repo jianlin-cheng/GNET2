@@ -144,8 +144,76 @@ build_moduleR <- function(X,Y,max_depth,cor_cutoff,min_divide_size){
     return(group_table)
 }
 
+#' Build regression tree with splits are detemined by K-means heuristicly.
+#'
+#' Build regression tree based on Gaussian Likelihood score.
+#' @param X A n by p matrix as input.
+#' @param Y A n by q matrix as response.
+#' @param max_depth Maximum depth of the tree.
+#' @param cor_cutoff Cutoff for within group Pearson correlation coefficient, if all data belong to 
+#' a node have average correlation greater or equal to this, the node would not split anymore.
+#' @param min_divide_size Minimum number of data belong to a node allowed for further split of the node.
+#' 
+#' @return A matrix for sample informatrion for each tree level. First column is feature index used by the 
+#' node and second is the value used to split, 
+#' the rest of the columns are the split of sample: 0 means less or equal, 1 means greater and -1 
+#' means the sample does not belong to this node.
+#' @examples
+#' build_moduleR_heuristic(X = matrix(rnorm(5*10),5,10), Y = matrix(rnorm(5*10),5,10),
+#'                             max_depth=3,cor_cutoff=0.9,min_divide_size=3)
+#' @export
+build_moduleR_heuristic <- function(X,Y,max_depth,cor_cutoff,min_divide_size){
+  feature_remaining <- seq_len(ncol(X))
+  feature_num <- 0
+  subgroup_indicator <- rep(0,nrow(X))
+  groups <- c(0)
+  group_table <- matrix(-1, nrow = max_depth, ncol = nrow(X)+1)
+  while (feature_num < max_depth & length(groups)>0 & length(feature_remaining)>0){
+    best_score <- (-(10^6))
+    best_feature <- (-1)
+    for(i in groups){
+      current_split_group <- subgroup_indicator == i
+      y_current_split <- Y[current_split_group,,drop=FALSE]
+      for (j in feature_remaining){
+        feature_vals <- X[current_split_group,j]
+        score_nosplit <- calc_likelihood_score(y_current_split,rep(1,length(feature_vals)))
+        subgroup_divide <- as.numeric(kmeans(feature_vals,centers = 2)$cluster)-1
+        if(mean(feature_vals[subgroup_divide==0]) > mean(feature_vals[subgroup_divide==1])){
+          # 0 is always left and 1 is always right
+          subgroup_divide <- 1- subgroup_divide
+        }
+        score <- calc_likelihood_score(y_current_split,subgroup_divide) - score_nosplit
+        if (score > best_score){
+          best_score <- score
+          best_feature <- j
+          subgroup_labels <- rep(-1,length(current_split_group))
+          subgroup_labels[current_split_group] <- subgroup_divide
+        }
+      }
+    }
+    feature_num <- feature_num+1
+    group_table[feature_num,] <- c(best_feature-1,subgroup_labels)
+    subgroup_indicator_new <- get_leaf_labels(group_table)
+    subgroup_indicator_new[subgroup_indicator==-1] <- (-1)
+    subgroup_indicator <- subgroup_indicator_new
+    for (i in seq_len(2)-1){
+      new_divide_i <- subgroup_labels==i
+      if (sum(new_divide_i) <= min_divide_size){
+        subgroup_indicator[new_divide_i] <- (-1)
+      }else if(calc_correlation(t(Y[new_divide_i,])) >= cor_cutoff){
+        subgroup_indicator[new_divide_i] <- (-1)
+      }
+    }
+    groups <- unique(subgroup_indicator[subgroup_indicator!=-1])
+    feature_remaining <- feature_remaining[feature_remaining!=best_feature]
+  }
+  # remove unused rows
+  group_table <- group_table[apply(group_table, 1, function(x)sum(x!=-1))>0,]
+  return(group_table)
+}
+
 assign_regul <- function(regulator_data,gene_data,gene_group_table,min_group_size,
-                         max_depth,cor_cutoff,min_divide_size){
+                         max_depth,cor_cutoff,min_divide_size,heuristic = FALSE){
     X <- t(regulator_data)
     group_labels <- unique(gene_group_table)
     group_labels <- group_labels[group_labels!=-1]
@@ -158,7 +226,11 @@ assign_regul <- function(regulator_data,gene_data,gene_group_table,min_group_siz
         gene_idx <- gene_group_table == group_idx
         if (sum(gene_idx) >= min_group_size){
             Y <- t(gene_data[gene_idx,,drop=FALSE])
-            group_table_i <- build_module(X,Y,max_depth,cor_cutoff,min_divide_size)
+            if(heuristic){
+              group_table_i <- build_moduleR_heuristic(X,Y,max_depth,cor_cutoff,min_divide_size)
+            }else{
+              group_table_i <- build_module(X,Y,max_depth,cor_cutoff,min_divide_size)
+            }
             group_table_i <- group_table_i[apply(group_table_i, 1, function(x)(sum(x!=0)))!=0,]
             reg_group_table[i+1,] <- get_leaf_labels(group_table_i)
             group_table_end <- group_table_start+nrow(group_table_i)-1
@@ -245,16 +317,16 @@ assign_first_cluster <- function(gene_data,regulator_data,max_depth,
     return(gene_group_table)
 }
 
-run_gnet <- function(gene_data,regulator_data,init_method = 'boosting',init_group_num = 5,
-                     max_depth = 3,cor_cutoff = 0.9,min_divide_size = 3,min_group_size = 2,max_iter = 5){
+run_gnet <- function(gene_data,regulator_data,init_method = 'boosting',init_group_num = 5,max_depth = 3,
+                     cor_cutoff = 0.9,min_divide_size = 3,min_group_size = 2,max_iter = 5,heuristic = FALSE){
     message('Determining initial group number...')
     gene_group_table <- assign_first_cluster(gene_data,regulator_data,max_depth,
                                              init_group_num,init_method)
     message('Building module networks...')
     for (i in seq_len(max_iter)) {
         message('Iteration ',i)
-        assign_reg_names <- assign_regul(regulator_data,gene_data,gene_group_table,
-                                         min_group_size,max_depth,cor_cutoff,min_divide_size)
+        assign_reg_names <- assign_regul(regulator_data,gene_data,gene_group_table,min_group_size,
+                                         max_depth,cor_cutoff,min_divide_size,heuristic)
         gene_group_table_new <- assign_gene(gene_data,assign_reg_names[[2]])
         if(all(length(gene_group_table)==length(gene_group_table_new)) && all(gene_group_table==gene_group_table_new)){
             break
@@ -286,6 +358,7 @@ run_gnet <- function(gene_data,regulator_data,init_method = 'boosting',init_grou
 #' @param min_divide_size Minimum number of data belong to a node allowed for further split of the node.
 #' @param min_group_size Minimum number of genes allowed in a group.
 #' @param max_iter Maxumum number of iterations allowed if not converged.
+#' @param heuristic If the splites of the regression tree is determined by k-means heuristicly.
 #' 
 #' @return A list of expression data of genes, expression data of regulators, within group score, table of tree 
 #' structure and final assigned group of each gene.
@@ -301,14 +374,14 @@ run_gnet <- function(gene_data,regulator_data,init_method = 'boosting',init_grou
 #' gnet_result <- gnet(se,reg_names,init_method,init_group_num)
 #' @export
 gnet <- function(input,reg_names,init_method= 'boosting',init_group_num = 4,max_depth = 3,
-                 cor_cutoff = 0.9,min_divide_size = 3,min_group_size = 2,max_iter = 5){
+                 cor_cutoff = 0.9,min_divide_size = 3,min_group_size = 2,max_iter = 5,heuristic = FALSE){
     if(is(input,class2 = "SummarizedExperiment")){
         input <- assay(input)
     }
     gene_data <- input[!rownames(input)%in%reg_names,,drop=FALSE]
     regulator_data <- input[reg_names,,drop=FALSE]
-    result_all <- run_gnet(gene_data,regulator_data,init_method,init_group_num,max_depth,
-                                                 cor_cutoff,min_divide_size,min_group_size,max_iter)
+    result_all <- run_gnet(gene_data,regulator_data,init_method,init_group_num,max_depth,cor_cutoff,
+                           min_divide_size,min_group_size,max_iter,heuristic)
     reg_group_table <- result_all[[1]]
     gene_group_table <- result_all[[2]]
     avg_cor_list <- rep(0,length(unique(gene_group_table$group)))
