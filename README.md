@@ -1,8 +1,7 @@
 # GNET2
 Gene regulatory network modeling tool (GNET2)
-[Lab Page](http://calla.rnet.missouri.edu/cheng/).
 
-[Bioconductor version: Development (3.9)](https://bioconductor.org/packages/devel/bioc/html/GNET2.html)
+[Links on Bioconductor](https://bioconductor.org/packages/devel/bioc/html/GNET2.html)
 
 License
 -------
