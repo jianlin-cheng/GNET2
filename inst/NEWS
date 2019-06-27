@@ -1,3 +1,13 @@
+1.0.1
+  - Fix several conditions that may cause error in tree construction.
+
+1.0.0
+  - First version released in Bioconductor 3.9. 
+  - Imporove the performance of heuristic split of regression trees by K-means.
+
+0.99.13
+  - Added heuristic split of regression trees by K-means.
+  
 0.99.6
   - Improve the performance for module building with R code, now build_moduleR has same level of performance with its C++ version.
 
