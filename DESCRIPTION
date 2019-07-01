@@ -1,7 +1,7 @@
 Package: GNET2
 Type: Package
 Title: Constructing gene regulatory networks from expression data through functional module inference
-Version: 1.0.1
+Version: 1.1.1
 Author: Chen Chen, Jie Hou and Jianlin Cheng
 Maintainer: Chen Chen <ccm3x@mail.missouri.edu>
 Description: Cluster genes to functional groups with E-M process.
