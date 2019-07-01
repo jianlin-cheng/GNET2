@@ -39,7 +39,7 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 #' colnames(exp_data) <- paste0('condition_',1:ncol(exp_data))
 #' se <- SummarizedExperiment::SummarizedExperiment(assays=list(counts=exp_data))
 #' gnet_result <- gnet(se,reg_names,init_method,init_group_num)
-#' plot_tree(gnet_result,group_idx=0)
+#' plot_tree(gnet_result,group_idx=1)
 #' @export
 plot_tree <- function(gnet_result,group_idx){
     regulator_data <- gnet_result$regulator_data
@@ -112,7 +112,7 @@ plot_tree <- function(gnet_result,group_idx){
 #' colnames(exp_data) <- paste0('condition_',1:ncol(exp_data))
 #' se <- SummarizedExperiment::SummarizedExperiment(assays=list(counts=exp_data))
 #' gnet_result <- gnet(se,reg_names,init_method,init_group_num)
-#' plot_gene_group(gnet_result,group_idx=0)
+#' plot_gene_group(gnet_result,group_idx=1)
 #' @export
 plot_gene_group <- function(gnet_result,group_idx){
     gene_data <- gnet_result$gene_data
@@ -146,8 +146,15 @@ plot_gene_group <- function(gnet_result,group_idx){
         exp_val.m <- cbind.data.frame('y_idx'=rep(seq_len(nrow(exp_val1)),ncol(exp_val1)),
                                       exp_val.m,stringsAsFactors=FALSE)
         exp_label <- rep('',ncol(exp_val1))
-        exp_label[group_table2[i,]==0] <- 'Low'
-        exp_label[group_table2[i,]==1] <- 'High'
+        if(group_table2[i,1]==0){
+          # left low, right high
+          exp_label[which.max(group_table2[i,]==0)] <- '<- Low |'
+          exp_label[which.min(group_table2[i,]==1)] <- '| High ->'
+        }else{
+          # left high, right low
+          exp_label[which.max(group_table2[i,]==1)] <- '<- High |'
+          exp_label[which.min(group_table2[i,]==0)] <- '| Low ->'
+        }
         p <- ggplot(exp_val.m, aes_string('variable', 'y_idx')) + 
             geom_tile(aes_string(fill = 'value'), colour = "white") +
             scale_x_discrete(labels=exp_label)+
