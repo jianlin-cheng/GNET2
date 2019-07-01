@@ -4,12 +4,12 @@
 \alias{get_correlation_list}
 \title{Calculate correlation within each group.}
 \usage{
-get_correlation_list(x, labels)
+get_correlation_list(x, group_labels)
 }
 \arguments{
 \item{x}{A n by p matrix.}
 
-\item{labels}{A vector of length n, indicating the group of rows.}
+\item{group_labels}{A vector of length n, indicating the group of rows.}
 }
 \value{
 An array of Pearson correlation coefficient for each row, rows belong to the same group have same values.
@@ -18,5 +18,5 @@ An array of Pearson correlation coefficient for each row, rows belong to the sam
 Calculate Pearson correlation coefficient within each group.
 }
 \examples{
-get_correlation_list(x = matrix(rnorm(5*10),5,10), labels = c(rep(1,2),rep(2,3)))
+get_correlation_list(x = matrix(rnorm(5*10),5,10), group_labels = c(rep(1,2),rep(2,3)))
 }

@@ -46,16 +46,13 @@ reg_names <- paste0('TF',1:20)
 rownames(exp_data) <- c(reg_names,paste0('gene',1:(nrow(exp_data)-length(reg_names))))
 colnames(exp_data) <- paste0('condition_',1:ncol(exp_data))
 se <- SummarizedExperiment::SummarizedExperiment(assays=list(counts=exp_data))
-
 ```
 
 
 The module construction process make take a few time, depending on the size of data and maximum iterations allowed. 
 
 ```{r, echo=TRUE}
-# Build with the original K-means split strategy:
-gnet_result <- gnet(se,reg_names,init_method,init_group_num,heuristic = T)
-
+gnet_result <- gnet(se,reg_names,init_method,init_group_num,heuristic = TRUE)
 ```
 
 ## 4. Plot the modules and trees
@@ -63,14 +60,14 @@ Plot the regulators module and heatmap of the expression inferred downstream gen
 the bars at the top shows how samples are splited by the regression tree and the heatmap at the bottom shows how downstream genes are regulated by each subgroup determined by the regulators.
 
 ```{r, echo=TRUE,fig.width=10, fig.height=12}
-plot_gene_group(gnet_result,group_idx = 0)
+plot_gene_group(gnet_result,group_idx = 1)
 ```
 
 
 Plot the tree of the first group
 
 ```{r, echo=TRUE,fig.width=8, fig.height=8}
-plot_tree(gnet_result,group_idx = 0)
+plot_tree(gnet_result,group_idx = 1)
 ```
 
 
