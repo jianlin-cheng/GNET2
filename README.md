@@ -70,7 +70,7 @@ tree and the heatmap at the bottom shows how downstream genes are
 regulated by each subgroup determined by the regulators.
 
 ```
-plot_tree(gnet_result,group_idx = 0)
+plot_tree(gnet_result,group_idx = 1)
 ```
 
 
