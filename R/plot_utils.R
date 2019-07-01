@@ -122,7 +122,7 @@ plot_gene_group <- function(gnet_result,group_idx){
     exp_data1 <- gene_data[gene_group_table$gene[gene_group_table$group==group_idx],,drop=FALSE]
     regulator_data1 <- regulator_data[reg_group_table[reg_group_table[,1]==group_idx,2]+1,]
     group_table1 <- reg_group_table[reg_group_table[,1]==group_idx,3:ncol(reg_group_table)]
-    leaf_labels <- get_leaf_labels(group_table1,format_plot = TRUE)
+    leaf_labels <- get_leaf_group_labels(group_table1,format_plot = TRUE)
     row_order <- order(leaf_labels)
     group_table2 <- group_table1[,row_order,drop=FALSE]
     regulator_data2 <- regulator_data1[,row_order,drop=FALSE]
@@ -167,6 +167,10 @@ plot_gene_group <- function(gnet_result,group_idx){
     }
     
     # add heatmap
+    exp_data2 <- as.data.frame(t(scale(t(exp_data2))))
+    suppressWarnings({d <- dist(exp_data2, method = "euclidean")})
+    fit <- hclust(d, method="ward")
+    exp_data2 <- exp_data2[fit$order,]
     exp_lengend_low <- min(exp_data2)
     exp_lengend_high <- max(exp_data2)
     test_data.m <- melt(cbind.data.frame('gene'=rownames(exp_data2),exp_data2,stringsAsFactors=FALSE),id.vars = 'gene')
