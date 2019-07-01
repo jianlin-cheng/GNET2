@@ -4,12 +4,12 @@
 \alias{calc_likelihood_score}
 \title{Calculate Gaussian Likelihood score.}
 \usage{
-calc_likelihood_score(x, labels)
+calc_likelihood_score(x, group_labels)
 }
 \arguments{
 \item{x}{A n by p matrix.}
 
-\item{labels}{A vector of length n, indicating the group of rows.}
+\item{group_labels}{A vector of length n, indicating the group of rows.}
 }
 \value{
 The sum of log likelihood score of each group on each column.
@@ -18,5 +18,5 @@ The sum of log likelihood score of each group on each column.
 Calculate Gaussian Likelihood score.
 }
 \examples{
-calc_likelihood_score(x = matrix(rnorm(5*10),5,10), labels = c(rep(1,2),rep(2,3)))
+calc_likelihood_score(x = matrix(rnorm(5*10),5,10), group_labels = c(rep(1,2),rep(2,3)))
 }

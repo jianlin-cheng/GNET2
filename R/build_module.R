@@ -169,7 +169,7 @@ get_group_kmeans <- function(x){
 #' @export
 build_split_table <- function(X){
   split_table <- matrix(0,nrow = nrow(X),ncol = ncol(X))
-  for(i in 1:ncol(split_table)){
+  for(i in seq_len(ncol(split_table))){
     split_table[,i] <- get_group_kmeans(X[,i])
   }
   return(split_table)
@@ -307,7 +307,7 @@ build_moduleR_heuristic2 <- function(X,Y,max_depth,cor_cutoff,min_divide_size){
 }
 
 assign_regul <- function(regulator_data,gene_data,gene_group_table,min_group_size,
-                         max_depth,cor_cutoff,min_divide_size,heuristic = FALSE,split_table = NULL){
+                         max_depth,cor_cutoff,min_divide_size,heuristic = TRUE,split_table = NULL){
     X <- t(regulator_data)
     group_group_labels <- unique(gene_group_table)
     group_group_labels <- group_group_labels[group_group_labels!=-1]
@@ -417,7 +417,7 @@ assign_first_cluster <- function(gene_data,regulator_data,max_depth,
 }
 
 run_gnet <- function(gene_data,regulator_data,init_method = 'boosting',init_group_num = 5,max_depth = 3,
-                     cor_cutoff = 0.9,min_divide_size = 3,min_group_size = 2,max_iter = 5,heuristic = FALSE){
+                     cor_cutoff = 0.9,min_divide_size = 3,min_group_size = 2,max_iter = 5,heuristic = TRUE){
     message('Determining initial group number...')
     gene_group_table <- assign_first_cluster(gene_data,regulator_data,max_depth,
                                              init_group_num,init_method)

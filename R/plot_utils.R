@@ -146,14 +146,14 @@ plot_gene_group <- function(gnet_result,group_idx){
         exp_val.m <- cbind.data.frame('y_idx'=rep(seq_len(nrow(exp_val1)),ncol(exp_val1)),
                                       exp_val.m,stringsAsFactors=FALSE)
         exp_label <- rep('',ncol(exp_val1))
-        if(group_table2[i,1]==0){
+        if(which(group_table2[i,]==0)[1] < which(group_table2[i,]==1)[1]){
           # left low, right high
-          exp_label[which.max(group_table2[i,]==0)] <- '<- Low |'
-          exp_label[which.min(group_table2[i,]==1)] <- '| High ->'
+          exp_label[max(which(group_table2[i,]==0))] <- '<- | Low'
+          exp_label[min(which(group_table2[i,]==1))] <- 'High | ->'
         }else{
           # left high, right low
-          exp_label[which.max(group_table2[i,]==1)] <- '<- High |'
-          exp_label[which.min(group_table2[i,]==0)] <- '| Low ->'
+          exp_label[max(which(group_table2[i,]==1))] <- '<- | High'
+          exp_label[min(which(group_table2[i,]==0))] <- 'Low | ->'
         }
         p <- ggplot(exp_val.m, aes_string('variable', 'y_idx')) + 
             geom_tile(aes_string(fill = 'value'), colour = "white") +

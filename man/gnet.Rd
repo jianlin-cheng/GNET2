@@ -6,7 +6,7 @@
 \usage{
 gnet(input, reg_names, init_method = "boosting", init_group_num = 4,
   max_depth = 3, cor_cutoff = 0.9, min_divide_size = 3,
-  min_group_size = 2, max_iter = 5, heuristic = FALSE)
+  min_group_size = 2, max_iter = 5, heuristic = TRUE)
 }
 \arguments{
 \item{input}{A SummarizedExperiment object, or a p by n matrix of expression data of p genes and n samples,

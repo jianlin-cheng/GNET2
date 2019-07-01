@@ -27,5 +27,5 @@ rownames(exp_data) <- c(reg_names,paste0('gene',1:(nrow(exp_data)-length(reg_nam
 colnames(exp_data) <- paste0('condition_',1:ncol(exp_data))
 se <- SummarizedExperiment::SummarizedExperiment(assays=list(counts=exp_data))
 gnet_result <- gnet(se,reg_names,init_method,init_group_num)
-plot_tree(gnet_result,group_idx=0)
+plot_tree(gnet_result,group_idx=1)
 }
