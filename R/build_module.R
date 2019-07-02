@@ -325,14 +325,16 @@ assign_regul <- function(regulator_data,gene_data,gene_group_table,min_group_siz
             }else{
               group_table_i <- build_module(X,Y,max_depth,cor_cutoff,min_divide_size)
             }
-            if(!is.null(dim(group_table_i))){
+            if(length(ncol(group_table_i))!=0){
               group_table_i <- group_table_i[apply(group_table_i, 1, function(x)(sum(x!=0)))!=0,]
-              reg_group_table[i+1,] <- get_leaf_group_labels(group_table_i)
-              group_table_end <- group_table_start+nrow(group_table_i)-1
-              group_table[group_table_start:group_table_end,2:ncol(group_table)] <- group_table_i
-              group_table[group_table_start:group_table_end,1] <- i
-              i <- i+1
-              group_table_start <- group_table_end+1
+              if(length(ncol(group_table_i))!=0){
+                reg_group_table[i+1,] <- get_leaf_group_labels(group_table_i)
+                group_table_end <- group_table_start+nrow(group_table_i)-1
+                group_table[group_table_start:group_table_end,2:ncol(group_table)] <- group_table_i
+                group_table[group_table_start:group_table_end,1] <- i
+                i <- i+1
+                group_table_start <- group_table_end+1
+              }
             }
         }
     }
