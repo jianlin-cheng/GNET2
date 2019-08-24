@@ -86,10 +86,10 @@ plot_tree <- function(gnet_result,group_idx){
                                                         color = "aqua",shape = "ellipse",width = 0.9,fontsize = 16)
     edge_df <- create_edge_df(from = from_list,to = to_list,label = tolower(edge_labels),fontsize = 16)
     graph <- create_graph(nodes_df = node_df,edges_df = edge_df,attr_theme = NULL) 
-    graph <- add_global_graph_attrs(graph,attr_type = "graph",attr = c("layout", "rankdir","fontsize"),
-                                                                     value = c("dot", "LR"))
-    graph <- add_global_graph_attrs(graph,attr_type = "node", attr = c("fillcolor", "style", "fontname"), 
-                                            value = c("Azure","filled", "Helvetica"))
+    # graph <- add_global_graph_attrs(graph,attr_type = "graph",attr = c("layout", "rankdir","fontsize"),
+    #                                                                  value = c("dot", "LR"))
+    # graph <- add_global_graph_attrs(graph,attr_type = "node", attr = c("fillcolor", "style", "fontname"), 
+    #                                         value = c("Azure","filled", "Helvetica"))
     render_graph(graph)
 }
 
