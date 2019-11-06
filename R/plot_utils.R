@@ -93,6 +93,19 @@ plot_tree <- function(gnet_result,group_idx){
     render_graph(graph)
 }
 
+get_row_order <- function(group_table1,regulator_data1,exp_data1){
+    for(i in seq_len(nrow(group_table1))){
+      row_order <- seq_len(ncol(group_table1))
+      group_info <- group_table1[i,]
+      current_parent <- group_info %in% c(0,1)
+      row_order[current_parent] <- c(row_order[group_info==0],row_order[group_info==1])
+      group_table1 <- group_table1[,row_order]
+      regulator_data1 <- regulator_data1[,row_order]
+      exp_data1 <- exp_data1[,row_order]
+    }
+    return(list(group_table1,regulator_data1,exp_data1))
+}
+
 #' Plot a module
 #' 
 #' Plot the regulators module and heatmap of the expression inferred downstream genes for each sample. 
@@ -123,10 +136,15 @@ plot_gene_group <- function(gnet_result,group_idx){
     regulator_data1 <- regulator_data[reg_group_table[reg_group_table[,1]==group_idx,2]+1,]
     group_table1 <- reg_group_table[reg_group_table[,1]==group_idx,3:ncol(reg_group_table)]
     leaf_labels <- get_leaf_group_labels(group_table1,format_plot = TRUE)
-    row_order <- order(leaf_labels)
-    group_table2 <- group_table1[,row_order,drop=FALSE]
-    regulator_data2 <- regulator_data1[,row_order,drop=FALSE]
-    exp_data2 <- exp_data1[,row_order,drop=FALSE]
+    
+    row_order_list <- get_row_order(group_table1,regulator_data1,exp_data1)
+    group_table2 <- row_order_list[[1]]
+    regulator_data2 <- row_order_list[[2]]
+    exp_data2 <- row_order_list[[3]]
+    
+    # group_table2 <- group_table1[,row_order,drop=FALSE]
+    # regulator_data2 <- regulator_data1[,row_order,drop=FALSE]
+    # exp_data2 <- exp_data1[,row_order,drop=FALSE]
     test_regulators_names <- rownames(regulator_data2)
     layout=matrix(c(seq_len(length(test_regulators_names)),rep(length(test_regulators_names)+1,
                                                                length(test_regulators_names)*2)),ncol=1)

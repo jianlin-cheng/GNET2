@@ -430,12 +430,28 @@ run_gnet <- function(gene_data,regulator_data,init_method = 'boosting',init_grou
         assign_reg_names <- assign_regul(regulator_data,gene_data,gene_group_table,min_group_size,
                                          max_depth,cor_cutoff,min_divide_size,heuristic,split_table)
         gene_group_table_new <- assign_gene(gene_data,assign_reg_names[[2]])
+        max_group_idx <- as.numeric(names(which.max(table(gene_group_table_new))))
+        if(max(table(gene_group_table_new))>round(length(gene_group_table_new)/2)){
+            gene_group_table_largest <- assign_first_cluster(gene_data[gene_group_table_new == max_group_idx,],
+                                                             regulator_data,max_depth,init_group_num,init_method,max_group)
+            gene_group_table_largest[gene_group_table_largest==-1] <- (-1-max(gene_group_table_new))
+            gene_group_table_new[gene_group_table_new==max_group_idx] <- gene_group_table_largest+max(gene_group_table_new)
+            gene_group_table_new <- as.numeric(as.factor(gene_group_table_new))
+            group_to_remove <- as.numeric(names(table(gene_group_table_new))[table(gene_group_table_new) <= min_group_size])
+            gene_group_table_new[gene_group_table_new %in% group_to_remove] <- -1
+            gene_group_table_new <- as.numeric(as.factor(gene_group_table_new))-1
+        }
+        
         if(all(length(gene_group_table)==length(gene_group_table_new)) && all(gene_group_table==gene_group_table_new)){
+            message('Converged.')
             break
         }else{
             gene_group_table <- gene_group_table_new
         }
     }
+    message('Generating final network modules...')
+    assign_reg_names <- assign_regul(regulator_data,gene_data,gene_group_table,min_group_size,
+                                     max_depth,cor_cutoff,min_divide_size,heuristic,split_table)
     message('Done.')
     tree_table_all <- assign_reg_names[[1]]
     colnames(tree_table_all) <- c('group','feature',colnames(gene_data))
@@ -461,6 +477,7 @@ run_gnet <- function(gene_data,regulator_data,init_method = 'boosting',init_grou
 #' @param min_group_size Minimum number of genes allowed in a group.
 #' @param max_iter Maxumum number of iterations allowed if not converged.
 #' @param heuristic If the splites of the regression tree is determined by k-means heuristicly.
+#' @param max_group Max number of group allowed for the first clustering step, default equals init_group_num and is set to 0.
 #' 
 #' @return A list of expression data of genes, expression data of regulators, within group score, table of tree 
 #' structure and final assigned group of each gene.
@@ -476,9 +493,13 @@ run_gnet <- function(gene_data,regulator_data,init_method = 'boosting',init_grou
 #' gnet_result <- gnet(se,reg_names,init_method,init_group_num)
 #' @export
 gnet <- function(input,reg_names,init_method= 'boosting',init_group_num = 4,max_depth = 3,
-                 cor_cutoff = 0.9,min_divide_size = 3,min_group_size = 2,max_iter = 5,heuristic = TRUE,max_group=5){
+                 cor_cutoff = 0.9,min_divide_size = 3,min_group_size = 2,max_iter = 5,
+                 heuristic = TRUE,max_group = 0){
     if(is(input,class2 = "SummarizedExperiment")){
         input <- assay(input)
+    }
+    if(max_group == 0){
+      max_group <- init_group_num
     }
     gene_data <- input[!rownames(input)%in%reg_names,,drop=FALSE]
     regulator_data <- input[reg_names,,drop=FALSE]

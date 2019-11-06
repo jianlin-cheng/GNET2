@@ -1,3 +1,7 @@
+1.3.2
+  - Fix plot order issue.
+  - Add group split procedure for module groups with too many genes.
+
 1.3.1
   - Fix the initial group number limit.
 
