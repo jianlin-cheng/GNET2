@@ -7,7 +7,7 @@
 gnet(input, reg_names, init_method = "boosting", init_group_num = 4,
   max_depth = 3, cor_cutoff = 0.9, min_divide_size = 3,
   min_group_size = 2, max_iter = 5, heuristic = TRUE,
-  max_group = 0)
+  max_group = 0, force_split = 0.5)
 }
 \arguments{
 \item{input}{A SummarizedExperiment object, or a p by n matrix of expression data of p genes and n samples,
@@ -33,6 +33,8 @@ average correlation greater or equal to this, the node would not split anymore.}
 \item{heuristic}{If the splites of the regression tree is determined by k-means heuristicly.}
 
 \item{max_group}{Max number of group allowed for the first clustering step, default equals init_group_num and is set to 0.}
+
+\item{force_split}{Force split the largest gene group into smaller groups by kmeans. Default is 0.5(Split if it contains more than half target genes)}
 }
 \value{
 A list of expression data of genes, expression data of regulators, within group score, table of tree 
