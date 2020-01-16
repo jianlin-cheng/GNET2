@@ -453,6 +453,7 @@ run_gnet <- function(gene_data,regulator_data,init_method = 'boosting',init_grou
     message('Generating final network modules...')
     assign_reg_names <- assign_regul(regulator_data,gene_data,gene_group_table,min_group_size,
                                      max_depth,cor_cutoff,min_divide_size,heuristic,split_table)
+    gene_group_table <- assign_gene(gene_data,assign_reg_names[[2]])
     message('Done.')
     tree_table_all <- assign_reg_names[[1]]
     colnames(tree_table_all) <- c('group','feature',colnames(gene_data))
@@ -562,8 +563,6 @@ extract_edges <- function(gnet_result){
     edge_list <- data.frame('regulator'=reg_list,'target'=target_list,'score'=group_score,stringsAsFactors = F)
     edge_list1 <- edge_list %>% group_by_(.dots = c('regulator','target')) %>% summarise_all(list('score' = sum))
     edge_list1 <- data.frame(edge_list1)
-    edge_list1$score[edge_list1$score>1] <- 1
-    edge_list1$score[edge_list1$score<-1] <- -1
-    
+
     return(edge_list1)
 }
