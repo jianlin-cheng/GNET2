@@ -25,3 +25,5 @@ importFrom(ggplot2,ggplot,aes_string,geom_tile,scale_x_discrete,scale_fill_gradi
            element_blank,element_line,element_text)
 importFrom(SummarizedExperiment,assay,SummarizedExperiment)
 importFrom(xgboost,xgb.DMatrix,xgb.train,xgb.importance,xgb.dump)
+importFrom(dplyr,group_by,summarise_all,"%>%")
+
