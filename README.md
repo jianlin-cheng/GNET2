@@ -14,7 +14,7 @@ GNET2 has been developed and used by the Bioinformatics, Data Mining and Machine
 Checkout the [Lab Page](http://calla.rnet.missouri.edu/cheng/).
 
 ## Install
-To install our latest versions from GitHub, open R and type:
+(Recommended) To install our latest versions from GitHub, open R and type:
 ```
 if (!requireNamespace("devtools", quietly = TRUE))
     install.packages("devtools")
@@ -23,7 +23,6 @@ install_github("chrischen1/GNET2")
 ```
 
 Older versions can be installed from Bioconductor:
-
 ```
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
