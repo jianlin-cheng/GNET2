@@ -532,9 +532,8 @@ gnet <- function(input,reg_names,init_method= 'boosting',init_group_num = 4,max_
 #' 
 #' Extract the network as edge list from the gnet result. For a module, each regulator and downstream gene will form a directed edge.
 #' @param gnet_result Returned results from gnet().
-#' @param cutoff Only modules with score above the cutoff will be extracted. Default is 0.1.
 #' 
-#' @return A two column edge list from the gnet result.
+#' @return A three column edge list from the gnet result.The third column are the sum of scores of any groups with the regulator-target interaction.
 #' @examples
 #' set.seed(1)
 #' init_group_num = 8
@@ -547,14 +546,24 @@ gnet <- function(input,reg_names,init_method= 'boosting',init_group_num = 4,max_
 #' gnet_result <- gnet(se,reg_names,init_method,init_group_num)
 #' edge_list <- extract_edges(gnet_result)
 #' @export
-extract_edges <- function(gnet_result, cutoff = 0.1){
-    edge_list <- NULL
+extract_edges <- function(gnet_result){
+    reg_counts <- as.numeric(table(gnet_result$reg_group_table[,1]))
+    gene_table <- as.numeric(table(gnet_result$gene_group_table$group))
+    feature_list <- target_list <- rep(0,sum(reg_counts*gene_table))
+    group_score <- rep(gnet_result$group_score,times=reg_counts*gene_table)
+    current_idx <- 1
     for (i in seq_len(length(gnet_result$group_score))) {
-      if(gnet_result$group_score[i]>=cutoff){
-        reg_names <- rownames(gnet_result$regulator_data)[gnet_result$reg_group_table[gnet_result$reg_group_table[,1]==i,2]+1]
-        gene_names <- as.character(gnet_result$gene_group_table$gene[gnet_result$gene_group_table$group==i])
-        edge_list <- rbind(edge_list,expand.grid(reg_names,gene_names))
-      }
+      end_idx <- current_idx+reg_counts[i]*gene_table[i]-1
+      feature_list[current_idx:end_idx] <- rep(gnet_result$reg_group_table[gnet_result$reg_group_table[,1]==i,2],gene_table[i])
+      target_list[current_idx:end_idx] <- rep(as.character(gnet_result$gene_group_table$gene)[gnet_result$gene_group_table$group==i],reg_counts[i])
+      current_idx <- end_idx+1
     }
-    return(edge_list)
+    reg_list <- rownames(gnet_result$regulator_data)[feature_list+1]
+    edge_list <- data.frame('regulator'=reg_list,'target'=target_list,'score'=group_score,stringsAsFactors = F)
+    edge_list1 <- edge_list %>% group_by_(.dots = c('regulator','target')) %>% summarise_all(list('score' = sum))
+    edge_list1 <- data.frame(edge_list1)
+    edge_list1$score[edge_list1$score>1] <- 1
+    edge_list1$score[edge_list1$score<-1] <- -1
+    
+    return(edge_list1)
 }

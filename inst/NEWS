@@ -1,3 +1,6 @@
+1.3.7
+  - The retuun of extract_edges() now contains the group score.
+
 1.3.3
   - Add function to extract the network from the gnet result
 

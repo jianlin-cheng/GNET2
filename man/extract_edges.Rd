@@ -4,15 +4,13 @@
 \alias{extract_edges}
 \title{Extract the network from the gnet result}
 \usage{
-extract_edges(gnet_result, cutoff = 0.1)
+extract_edges(gnet_result)
 }
 \arguments{
 \item{gnet_result}{Returned results from gnet().}
-
-\item{cutoff}{Only modules with score above the cutoff will be extracted. Default is 0.1.}
 }
 \value{
-A two column edge list from the gnet result.
+A three column edge list from the gnet result.The third column are the sum of scores of any groups with the regulator-target interaction.
 }
 \description{
 Extract the network as edge list from the gnet result. For a module, each regulator and downstream gene will form a directed edge.
