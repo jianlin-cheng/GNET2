@@ -560,7 +560,7 @@ extract_edges <- function(gnet_result){
     }
     reg_list <- rownames(gnet_result$regulator_data)[feature_list+1]
     edge_list <- data.frame('regulator'=reg_list,'target'=target_list,'score'=group_score,stringsAsFactors = F)
-    edge_list1 <- edge_list %>% group_by(regulator,target) %>% summarise_all(list('score' = sum))
+    edge_list1 <- edge_list %>% group_by_(.dots = c('regulator','target')) %>% summarise_all(list('score' = sum))
     edge_list1 <- data.frame(edge_list1)
     edge_list1$score[edge_list1$score>1] <- 1
     edge_list1$score[edge_list1$score<-1] <- -1
