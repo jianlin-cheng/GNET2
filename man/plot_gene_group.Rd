@@ -4,12 +4,14 @@
 \alias{plot_gene_group}
 \title{Plot a module}
 \usage{
-plot_gene_group(gnet_result, group_idx)
+plot_gene_group(gnet_result, group_idx, tree_layout = 1)
 }
 \arguments{
 \item{gnet_result}{Results returned by gnet().}
 
 \item{group_idx}{Index of the module.}
+
+\item{tree_layout}{zoom ratio for the regulatory tree. Default is 1. Need to be increased for trees with >5 regulators.}
 }
 \value{
 None
