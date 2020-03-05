@@ -548,21 +548,22 @@ gnet <- function(input,reg_names,init_method= 'boosting',init_group_num = 4,max_
 #' edge_list <- extract_edges(gnet_result)
 #' @export
 extract_edges <- function(gnet_result){
-    reg_counts <- as.numeric(table(gnet_result$reg_group_table[,1]))
-    gene_table <- as.numeric(table(gnet_result$gene_group_table$group))
-    feature_list <- target_list <- rep(0,sum(reg_counts*gene_table))
-    group_score <- rep(gnet_result$group_score,times=reg_counts*gene_table)
-    current_idx <- 1
-    for (i in seq_len(length(gnet_result$group_score))) {
-      end_idx <- current_idx+reg_counts[i]*gene_table[i]-1
-      feature_list[current_idx:end_idx] <- rep(gnet_result$reg_group_table[gnet_result$reg_group_table[,1]==i,2],gene_table[i])
-      target_list[current_idx:end_idx] <- rep(as.character(gnet_result$gene_group_table$gene)[gnet_result$gene_group_table$group==i],reg_counts[i])
-      current_idx <- end_idx+1
-    }
-    reg_list <- rownames(gnet_result$regulator_data)[feature_list+1]
-    edge_list <- data.frame('regulator'=reg_list,'target'=target_list,'score'=group_score,stringsAsFactors = F)
-    edge_list1 <- edge_list %>% group_by_(.dots = c('regulator','target')) %>% summarise_all(list('score' = sum))
-    edge_list1 <- data.frame(edge_list1)
-
-    return(edge_list1)
+  library(dplyr)
+  el <- NULL
+  for (i in 1:length(gnet_result$group_score)) {
+    tf_i <- rownames(gnet_result$regulator_data)[gnet_result$reg_group_table[gnet_result$reg_group_table[,1]==i,2]+1]
+    if(sum(is.na(tf_i))>0)print(i)
+    gene_i <- gnet_result$gene_group_table$gene[gnet_result$gene_group_table$group==i]
+    d <- rbind.data.frame(expand.grid(tf_i,tf_i),expand.grid(tf_i,gene_i),stringsAsFactors =F)
+    d <- cbind.data.frame(d,gnet_result$group_score[i],stringsAsFactors =F)
+    el <- rbind.data.frame(el,d,stringsAsFactors =F)
+  }
+  
+  colnames(el)<- c('regulator','target','score')
+  el1 <- el %>% group_by_(.dots = c('regulator','target')) %>% summarise_all(list('score' = sum))
+  el1 <- data.frame(el1,stringsAsFactors = F)
+  el1 <- el1[as.numeric(el1$regulator)!= as.numeric(el1$target),]
+  el1$score <- el1$score/max(el1$score)
+  rownames(el1) <- 1:nrow(el1)
+  return(el1)
 }

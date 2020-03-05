@@ -114,6 +114,7 @@ get_row_order <- function(group_table1,regulator_data1,exp_data1){
 #' subgroup determined by the regulators.
 #' @param gnet_result Results returned by gnet().
 #' @param group_idx Index of the module.
+#' @param tree_layout zoom ratio for the regulatory tree. Default is 1. Need to be increased for trees with >5 regulators.
 #' @return None
 #' @examples
 #' set.seed(1)
@@ -127,7 +128,7 @@ get_row_order <- function(group_table1,regulator_data1,exp_data1){
 #' gnet_result <- gnet(se,reg_names,init_method,init_group_num)
 #' plot_gene_group(gnet_result,group_idx=1)
 #' @export
-plot_gene_group <- function(gnet_result,group_idx){
+plot_gene_group <- function(gnet_result,group_idx,tree_layout=1){
     gene_data <- gnet_result$gene_data
     regulator_data <- gnet_result$regulator_data
     reg_group_table <- gnet_result$reg_group_table
@@ -146,8 +147,9 @@ plot_gene_group <- function(gnet_result,group_idx){
     # regulator_data2 <- regulator_data1[,row_order,drop=FALSE]
     # exp_data2 <- exp_data1[,row_order,drop=FALSE]
     test_regulators_names <- rownames(regulator_data2)
-    layout=matrix(c(seq_len(length(test_regulators_names)),rep(length(test_regulators_names)+1,
-                                                               length(test_regulators_names)*2)),ncol=1)
+    layout=matrix(c(rep(seq_len(length(test_regulators_names)),each=tree_layout),
+                    rep(length(test_regulators_names)+1,
+                        length(test_regulators_names)*2)),ncol=1)
     regulators_plist <- list()
     scaleFUN <- function(x) sprintf("%.3f", x)
 
