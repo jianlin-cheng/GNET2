@@ -504,6 +504,7 @@ gnet <- function(input,reg_names,init_method= 'boosting',init_group_num = 4,max_
     if(max_group == 0){
       max_group <- init_group_num
     }
+    input <- input[apply(input, 1, var) > 0.01,]
     gene_data <- input[!rownames(input)%in%reg_names,,drop=FALSE]
     regulator_data <- input[reg_names,,drop=FALSE]
     result_all <- run_gnet(gene_data,regulator_data,init_method,init_group_num,max_depth,cor_cutoff,

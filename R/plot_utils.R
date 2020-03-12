@@ -252,3 +252,38 @@ plot_group_correlation <- function(gnet_result){
     }
     return(which(avg_cor_list >= avg_cor_list2[kp]))
 }
+
+#' Save the GNET2 results
+#' 
+#' Save the edge list, group index of each gene and plot the top groups 
+#' @param gnet_result Results returned by gnet().
+#' @save_path path to save files
+#' @n The number of modules with highest score to plot.
+#' 
+#' @return None
+#' @examples
+#' set.seed(1)
+#' init_group_num = 5
+#' init_method = 'boosting'
+#' exp_data <- matrix(rnorm(50*10),50,10)
+#' reg_names <- paste0('TF',1:5)
+#' rownames(exp_data) <- c(reg_names,paste0('gene',1:(nrow(exp_data)-length(reg_names))))
+#' colnames(exp_data) <- paste0('condition_',1:ncol(exp_data))
+#' se <- SummarizedExperiment::SummarizedExperiment(assays=list(counts=exp_data))
+#' gnet_result <- gnet(se,reg_names,init_method,init_group_num)
+#' save_gnet(gnet_result)
+#' @export
+save_gnet <- function(gnet_results,save_path = '.',n=10){
+  dir.create(save_path,showWarnings = F)
+  l <- extract_edges(gnet_results)
+  l$score <- l$score/(max(l$score))
+  write.csv(l,paste0(save_path,'/gnet_results.csv'))
+  
+  top10g <- order(gnet_results$group_score,decreasing = T)
+  for (i in top10g[1:min(n,length(top10g))]) {
+    tiff(paste0(save_path,'/module_',i,'.tiff'),compression = 'lzw')
+    plot_gene_group(gnet_results,i)
+    dev.off()
+  }
+  write.csv(gnet_results$gene_group_table,paste0(save_path,'/gene_group_table.csv'))
+}

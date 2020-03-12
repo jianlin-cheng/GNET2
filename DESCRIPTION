@@ -14,11 +14,11 @@ Depends:
     R (>= 3.3)
 Imports:
     ggplot2,xgboost,Rcpp,reshape2,grid,DiagrammeR,methods,stats,matrixStats,graphics,SummarizedExperiment,dplyr
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2
 Suggests: 
     knitr,
     rmarkdown
 VignetteBuilder: knitr
 biocViews: GeneExpression, Regression, Network, NetworkInference, Software
 URL: https://github.com/chrischen1/GNET2
-BugReports:https://github.com/chrischen1/GNET2/issues
+BugReports: https://github.com/chrischen1/GNET2/issues
