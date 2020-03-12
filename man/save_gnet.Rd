@@ -4,7 +4,7 @@
 \alias{save_gnet}
 \title{Save the GNET2 results}
 \usage{
-save_gnet(gnet_results, save_path = ".", n = 10)
+save_gnet(gnet_results, save_path = ".", n = 10, max_gene_num = 100)
 }
 \arguments{
 \item{gnet_result}{Results returned by gnet().}
