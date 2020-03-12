@@ -383,8 +383,8 @@ kneepointDetection <- function (vect){
 }
 
 
-assign_first_cluster <- function(gene_data,regulator_data,max_depth,
-                                 init_group_num,init_method='boosting',max_group=5){
+assign_first_cluster <- function(gene_data,regulator_data,max_depth,init_group_num,
+                                 init_method='boosting',max_group=5){
     if(init_method=='boosting'){
         ipt_mat <- matrix(0,nrow = nrow(gene_data),ncol = nrow(regulator_data))
         rownames(ipt_mat) <- rownames(gene_data)
@@ -504,7 +504,7 @@ gnet <- function(input,reg_names,init_method= 'boosting',init_group_num = 4,max_
     if(max_group == 0){
       max_group <- init_group_num
     }
-    input <- input[apply(input, 1, var) > 0.01,]
+    input <- input[apply(input, 1, var) > 0.0001,]
     gene_data <- input[!rownames(input)%in%reg_names,,drop=FALSE]
     regulator_data <- input[reg_names,,drop=FALSE]
     result_all <- run_gnet(gene_data,regulator_data,init_method,init_group_num,max_depth,cor_cutoff,
@@ -524,7 +524,7 @@ gnet <- function(input,reg_names,init_method= 'boosting',init_group_num = 4,max_
         cor_m <- cor(t(gene_data[gene_group_table$group==groups_left[i],,drop=FALSE]))
         avg_cor_list[i] <- mean(cor_m[upper.tri(cor_m)])
     }
-    
+    if(nrow(reg_group_table_out)<=2)warning('Too few modules generated, you may wish to try with higher cor_cutoff.')
     return(list('gene_data' = gene_data,'regulator_data' = regulator_data,'group_score' = avg_cor_list,
                 'reg_group_table' = reg_group_table_out,'gene_group_table' = gene_group_table_out))
 }

@@ -12,6 +12,7 @@ export(plot_gene_group)
 export(plot_group_correlation)
 export(plot_tree)
 export(extract_edges)
+export(save_gnet)
 
 importFrom(Rcpp, evalCpp)
 importFrom(DiagrammeR,create_node_df,create_edge_df,create_graph,add_global_graph_attrs,render_graph)
