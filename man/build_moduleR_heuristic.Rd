@@ -4,8 +4,14 @@
 \alias{build_moduleR_heuristic}
 \title{Build regression tree with splits are detemined by K-means heuristicly.}
 \usage{
-build_moduleR_heuristic(X, Y, max_depth, cor_cutoff, min_divide_size,
-  split_table)
+build_moduleR_heuristic(
+  X,
+  Y,
+  max_depth,
+  cor_cutoff,
+  min_divide_size,
+  split_table
+)
 }
 \arguments{
 \item{X}{A n by p matrix as input.}
