@@ -106,6 +106,16 @@ get_row_order <- function(group_table1,regulator_data1,exp_data1){
     return(list(group_table1,regulator_data1,exp_data1))
 }
 
+get_range_potion <- function(x,label){
+  range_list <- 0
+  for (i in seq_len(length(label))) {
+    x_i <- x[label==label[i]]
+    range_list <- range_list + (max(x_i)-min(x_i))/mean(x_i)
+  }
+  return(range_list)
+}
+
+
 #' Plot a module
 #' 
 #' Plot the regulators module and heatmap of the expression inferred downstream genes for each sample. 
@@ -115,6 +125,7 @@ get_row_order <- function(group_table1,regulator_data1,exp_data1){
 #' @param gnet_result Results returned by gnet().
 #' @param group_idx Index of the module.
 #' @param tree_layout zoom ratio for the regulatory tree. Default is 1. Need to be increased for trees with >5 regulators.
+#' @param max_gene_num Max size of gene to plot in the heatmap. Only genes with highest n variances will be kept.
 #' @return None
 #' @examples
 #' set.seed(1)
@@ -128,7 +139,7 @@ get_row_order <- function(group_table1,regulator_data1,exp_data1){
 #' gnet_result <- gnet(se,reg_names,init_method,init_group_num)
 #' plot_gene_group(gnet_result,group_idx=1)
 #' @export
-plot_gene_group <- function(gnet_result,group_idx,tree_layout=1){
+plot_gene_group <- function(gnet_result,group_idx,tree_layout=1,max_gene_num=100){
     gene_data <- gnet_result$gene_data
     regulator_data <- gnet_result$regulator_data
     reg_group_table <- gnet_result$reg_group_table
@@ -146,6 +157,13 @@ plot_gene_group <- function(gnet_result,group_idx,tree_layout=1){
     # group_table2 <- group_table1[,row_order,drop=FALSE]
     # regulator_data2 <- regulator_data1[,row_order,drop=FALSE]
     # exp_data2 <- exp_data1[,row_order,drop=FALSE]
+    
+    if (nrow(exp_data2)>max_gene_num) {
+      lscores <- apply(exp_data2, 1, function(x)get_range_potion(x,leaf_labels))
+      exp_data2 <- exp_data2[order(lscores)[1:max_gene_num],]
+      
+    }
+    
     test_regulators_names <- rownames(regulator_data2)
     layout=matrix(c(rep(seq_len(length(test_regulators_names)),each=tree_layout),
                     rep(length(test_regulators_names)+1,
@@ -257,8 +275,9 @@ plot_group_correlation <- function(gnet_result){
 #' 
 #' Save the edge list, group index of each gene and plot the top groups 
 #' @param gnet_result Results returned by gnet().
-#' @save_path path to save files
-#' @n The number of modules with highest score to plot.
+#' @param save_path path to save files
+#' @param num_module The number of modules with highest score to plot.
+#' @param max_gene_num The max number of genes to show in the heatmap.
 #' 
 #' @return None
 #' @examples
@@ -273,17 +292,20 @@ plot_group_correlation <- function(gnet_result){
 #' gnet_result <- gnet(se,reg_names,init_method,init_group_num)
 #' save_gnet(gnet_result)
 #' @export
-save_gnet <- function(gnet_results,save_path = '.',n=10){
+save_gnet <- function(gnet_result,save_path = '.',num_module=10,max_gene_num=100){
   dir.create(save_path,showWarnings = F)
-  l <- extract_edges(gnet_results)
+  l <- extract_edges(gnet_result)
   l$score <- l$score/(max(l$score))
   write.csv(l,paste0(save_path,'/gnet_results.csv'))
   
-  top10g <- order(gnet_results$group_score,decreasing = T)
-  for (i in top10g[1:min(n,length(top10g))]) {
+  top10g <- order(gnet_result$group_score,decreasing = T)
+  for (i in top10g[1:min(num_module,length(top10g))]) {
     tiff(paste0(save_path,'/module_',i,'.tiff'),compression = 'lzw')
-    plot_gene_group(gnet_results,i)
+    plot_gene_group(gnet_result,i,max_gene_num = max_gene_num)
     dev.off()
   }
-  write.csv(gnet_results$gene_group_table,paste0(save_path,'/gene_group_table.csv'))
+  write.csv(gnet_result$gene_group_table,paste0(save_path,'/gene_group_table.csv'))
+  el <- extract_edges(gnet_result)
+  write.csv(el,paste0(save_path,'/gnet_results.csv'))
+  save(gnet_result,file = paste0(save_path,'/gnet_results.rda'))
 }

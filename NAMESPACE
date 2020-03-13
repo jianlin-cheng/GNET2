@@ -12,6 +12,7 @@ export(plot_gene_group)
 export(plot_group_correlation)
 export(plot_tree)
 export(extract_edges)
+export(save_gnet)
 
 importFrom(Rcpp, evalCpp)
 importFrom(DiagrammeR,create_node_df,create_edge_df,create_graph,add_global_graph_attrs,render_graph)
@@ -26,4 +27,7 @@ importFrom(ggplot2,ggplot,aes_string,geom_tile,scale_x_discrete,scale_fill_gradi
 importFrom(SummarizedExperiment,assay,SummarizedExperiment)
 importFrom(xgboost,xgb.DMatrix,xgb.train,xgb.importance,xgb.dump)
 importFrom(dplyr,group_by_,summarise_all,"%>%")
+importFrom(igraph, graph_from_edgelist,get.edgelist)
+importFrom(grDevices, tiff,dev.off)
+importFrom(utils, write.csv)
 

@@ -4,10 +4,16 @@
 \alias{save_gnet}
 \title{Save the GNET2 results}
 \usage{
-save_gnet(gnet_results, save_path = ".", n = 10)
+save_gnet(gnet_result, save_path = ".", num_module = 10, max_gene_num = 100)
 }
 \arguments{
 \item{gnet_result}{Results returned by gnet().}
+
+\item{save_path}{path to save files}
+
+\item{num_module}{The number of modules with highest score to plot.}
+
+\item{max_gene_num}{The max number of genes to show in the heatmap.}
 }
 \value{
 None

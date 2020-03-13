@@ -4,7 +4,7 @@
 \alias{plot_gene_group}
 \title{Plot a module}
 \usage{
-plot_gene_group(gnet_result, group_idx, tree_layout = 1)
+plot_gene_group(gnet_result, group_idx, tree_layout = 1, max_gene_num = 100)
 }
 \arguments{
 \item{gnet_result}{Results returned by gnet().}
@@ -12,6 +12,8 @@ plot_gene_group(gnet_result, group_idx, tree_layout = 1)
 \item{group_idx}{Index of the module.}
 
 \item{tree_layout}{zoom ratio for the regulatory tree. Default is 1. Need to be increased for trees with >5 regulators.}
+
+\item{max_gene_num}{Max size of gene to plot in the heatmap. Only genes with highest n variances will be kept.}
 }
 \value{
 None

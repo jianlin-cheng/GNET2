@@ -383,8 +383,8 @@ kneepointDetection <- function (vect){
 }
 
 
-assign_first_cluster <- function(gene_data,regulator_data,max_depth,
-                                 init_group_num,init_method='boosting',max_group=5){
+assign_first_cluster <- function(gene_data,regulator_data,max_depth,init_group_num,
+                                 init_method='boosting',max_group=5){
     if(init_method=='boosting'){
         ipt_mat <- matrix(0,nrow = nrow(gene_data),ncol = nrow(regulator_data))
         rownames(ipt_mat) <- rownames(gene_data)
@@ -504,7 +504,7 @@ gnet <- function(input,reg_names,init_method= 'boosting',init_group_num = 4,max_
     if(max_group == 0){
       max_group <- init_group_num
     }
-    input <- input[apply(input, 1, var) > 0.01,]
+    input <- input[apply(input, 1, var) > 0.0001,]
     gene_data <- input[!rownames(input)%in%reg_names,,drop=FALSE]
     regulator_data <- input[reg_names,,drop=FALSE]
     result_all <- run_gnet(gene_data,regulator_data,init_method,init_group_num,max_depth,cor_cutoff,
@@ -524,11 +524,19 @@ gnet <- function(input,reg_names,init_method= 'boosting',init_group_num = 4,max_
         cor_m <- cor(t(gene_data[gene_group_table$group==groups_left[i],,drop=FALSE]))
         avg_cor_list[i] <- mean(cor_m[upper.tri(cor_m)])
     }
-    
+    if(nrow(reg_group_table_out)<=2)warning('Too few modules generated, you may wish to try with higher cor_cutoff.')
     return(list('gene_data' = gene_data,'regulator_data' = regulator_data,'group_score' = avg_cor_list,
                 'reg_group_table' = reg_group_table_out,'gene_group_table' = gene_group_table_out))
 }
 
+sum_scores <- function(el_all,el_input){
+  scores <- rep(0,nrow(el_all))
+  for (i in 1:nrow(el_all)) {
+    idx <- (el_input[,1] == el_all[i,1] & el_input[,2] == el_all[i,2]) | (el_input[,2] == el_all[i,1] & el_input[,1] == el_all[i,2])
+    scores[i] <- sum(abs(el_input[idx,3]))
+  }
+  return(scores)
+}
 
 #' Extract the network from the gnet result
 #' 
@@ -549,22 +557,29 @@ gnet <- function(input,reg_names,init_method= 'boosting',init_group_num = 4,max_
 #' edge_list <- extract_edges(gnet_result)
 #' @export
 extract_edges <- function(gnet_result){
-  library(dplyr)
   el <- NULL
   for (i in 1:length(gnet_result$group_score)) {
     tf_i <- rownames(gnet_result$regulator_data)[gnet_result$reg_group_table[gnet_result$reg_group_table[,1]==i,2]+1]
     if(sum(is.na(tf_i))>0)print(i)
     gene_i <- gnet_result$gene_group_table$gene[gnet_result$gene_group_table$group==i]
-    d <- rbind.data.frame(expand.grid(tf_i,tf_i),expand.grid(tf_i,gene_i),stringsAsFactors =F)
+    d <- rbind.data.frame(expand.grid(tf_i,tf_i,stringsAsFactors =F),
+                          expand.grid(tf_i,gene_i,stringsAsFactors =F),stringsAsFactors =F)
     d <- cbind.data.frame(d,gnet_result$group_score[i],stringsAsFactors =F)
     el <- rbind.data.frame(el,d,stringsAsFactors =F)
   }
   
+  g_all <- graph_from_edgelist(as.matrix(el[,1:2]),directed = F)
+  el1a <- unique(get.edgelist(g_all))
+  el1b <- sum_scores(el1a,el)
+  el <- cbind.data.frame(el1a,'score'=el1b)
+  
   colnames(el)<- c('regulator','target','score')
   el1 <- el %>% group_by_(.dots = c('regulator','target')) %>% summarise_all(list('score' = sum))
-  el1 <- data.frame(el1,stringsAsFactors = F)
-  el1 <- el1[as.numeric(el1$regulator)!= as.numeric(el1$target),]
-  el1$score <- el1$score/max(el1$score)
-  rownames(el1) <- 1:nrow(el1)
-  return(el1)
+  el2 <- data.frame('regulator'=as.character(el1$regulator),
+                    'target'=as.character(el1$target),
+                    'score'=as.numeric(el1$score),stringsAsFactors = F)
+  el2 <- el2[el1$regulator!= el2$target,]
+  el2$score <- el2$score/max(el2$score)
+  rownames(el2) <- 1:nrow(el2)
+  return(el2)
 }
