@@ -1,0 +1,85 @@
+---
+title: "Build functional gene modules with GNET2"
+author: "Chen Chen"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Build functional gene modules with GNET2}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup,echo = FALSE, include = TRUE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## 1. Introduction
+GNET2 is a R package used for build regulator network and cluster genes to functional groups with E-M process.
+It iteratively perform TF assigning and Gene assigning, until the assignment of genes did not change, or max number of iterations is reached.
+
+## 2. Installation
+To install, open R and type:
+```
+install.packages("devtools")
+library("devtools")
+install_github("chrischen1/GNET2")
+```
+
+## 3. Build module networks
+```{r load_packages, message=FALSE, warning=FALSE, include=FALSE}
+library(GNET2)
+```
+
+We first generate random expression data and a list of regulator gene names. 
+
+The input is typically a p by n matrix of expression data of p genes and n samples, for example log2 RPKM from RNA-Seq.
+
+```{r,echo = TRUE}
+set.seed(2)
+init_group_num = 8
+init_method = 'boosting'
+exp_data <- matrix(rnorm(600*12),600,12)
+reg_names <- paste0('TF',1:20)
+rownames(exp_data) <- c(reg_names,paste0('gene',1:(nrow(exp_data)-length(reg_names))))
+colnames(exp_data) <- paste0('condition_',1:ncol(exp_data))
+se <- SummarizedExperiment::SummarizedExperiment(assays=list(counts=exp_data))
+```
+
+
+The module construction process make take a few time, depending on the size of data and maximum iterations allowed. 
+
+```{r, echo=TRUE}
+gnet_result <- gnet(se,reg_names,init_method,init_group_num,heuristic = TRUE)
+```
+
+## 4. Plot the modules and trees
+Plot the regulators module and heatmap of the expression inferred downstream genes for each sample. It can be interpreted as two parts:
+the bars at the top shows how samples are splited by the regression tree and the heatmap at the bottom shows how downstream genes are regulated by each subgroup determined by the regulators.
+
+```{r, echo=TRUE,fig.width=10, fig.height=12}
+plot_gene_group(gnet_result,group_idx = 1)
+```
+
+
+Plot the tree of the first group
+
+```{r, echo=TRUE,fig.width=8, fig.height=8}
+plot_tree(gnet_result,group_idx = 1)
+```
+
+
+Plot the correlation of each group and auto detected knee point.
+
+```{r, echo=TRUE,fig.width=8, fig.height=8}
+group_above_kn <- plot_group_correlation(gnet_result)
+print(group_above_kn)
+```
+
+The group indices in group_above_kn can been used as a list of indices of the data point with correlation higher than the knee point. You may consider use them only for further analysis.
+
+```{r, echo=TRUE}
+sessionInfo()
+```
