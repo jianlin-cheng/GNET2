@@ -395,8 +395,8 @@ assign_first_cluster <- function(gene_data,regulator_data,max_depth,init_group_n
             if(length(xgb.dump(model = bst, with_stats = TRUE))!=4){
               # A constant tree: no predictors were used. 
               importance_matrix <- xgb.importance(model = bst)
+              ipt_mat[i,importance_matrix$Feature] <- importance_matrix$Gain
             }
-            ipt_mat[i,importance_matrix$Feature] <- importance_matrix$Gain
         }
     }else{
         ipt_mat <- gene_data
