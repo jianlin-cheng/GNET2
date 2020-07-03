@@ -92,7 +92,7 @@ get_leaf_group_labels <- function(group_table,format_plot=FALSE){
 #' a node have average correlation greater or equal to this, the node would not split anymore.
 #' @param min_divide_size Minimum number of data belong to a node allowed for further split of the node.
 #' 
-#' @return A matrix for sample informatrion for each tree level. First column is feature index used by the 
+#' @return A matrix for sample information for each tree level. First column is feature index used by the 
 #' node and second is the value used to split, 
 #' the rest of the columns are the split of sample: 0 means less or equal, 1 means greater and -1 
 #' means the sample does not belong to this node.
