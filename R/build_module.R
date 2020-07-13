@@ -571,8 +571,7 @@ sum_scores <- function(el_all,el_input){
 #' @export
 extract_edges <- function(gnet_result){
   el <- NULL
-  groups <- min(length(gnet_result$group_score),length(unique(gnet_result$reg_group_table[,1])))
-  for (i in seq_len(groups)) {
+  for (i in 1:length(gnet_result$group_score)) {
     tf_i <- rownames(gnet_result$regulator_data)[gnet_result$reg_group_table[gnet_result$reg_group_table[,1]==i,2]+1]
     if(sum(is.na(tf_i))>0)print(i)
     gene_i <- gnet_result$gene_group_table$gene[gnet_result$gene_group_table$group==i]
