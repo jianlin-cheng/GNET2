@@ -65,10 +65,34 @@ The module construction process make take a few time, depending on the size of d
 gnet_result <- gnet(se,tf_list)
 ```
 
+Show the total number of modules
+
+```
+print('Total number of modules:')
+print(gnet_result$modules_count)
+```
+
+Show the regulatory genes and target genes in the first module
+
+```
+group_index = 1
+print('Regulators in module 1:')
+print(gnet_result$regulators[[group_index]])
+print('Targets in module 1:')
+print(gnet_result$target_genes[[group_index]])
+```
+
+Return the interations and their scores as adjacency matrix
+
+```
+mat <- extract_edges(gnet_result)
+print(dim(mat))
+```
+
 Plot the tree of the first group
 
 ```
-plot_gene_group(gnet_result,group_idx = 11)
+plot_gene_group(gnet_result,group_idx = group_index)
 ```
 
 Plot the regulators module and heatmap of the expression inferred
@@ -78,7 +102,7 @@ tree and the heatmap at the bottom shows how downstream genes are
 regulated by each subgroup determined by the regulators.
 
 ```
-plot_tree(gnet_result,group_idx = 1)
+plot_tree(gnet_result,group_idx = group_index)
 ```
 
 

@@ -294,8 +294,7 @@ plot_group_correlation <- function(gnet_result){
 #' @export
 save_gnet <- function(gnet_result,save_path = '.',num_module=10,max_gene_num=100){
   dir.create(save_path,showWarnings = FALSE)
-  l <- extract_edges(gnet_result)
-  write.csv(l,paste0(save_path,'/gnet_results.csv'))
+  write.csv(extract_edges(gnet_result),paste0(save_path,'/gnet_results.csv'))
   
   top10g <- order(gnet_result$group_score,decreasing = TRUE)
   for (i in top10g[seq_len(min(num_module,length(top10g)))]) {

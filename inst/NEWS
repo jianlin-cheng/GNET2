@@ -1,5 +1,5 @@
-1.5.1
-  - Add list of regulator genes and target genes in the output.
+1.5.2
+  - extract_edges() now returns an adjacency matrix for interations and their scores.
 
 1.3.7
   - The retuun of extract_edges() now contains the group score.
