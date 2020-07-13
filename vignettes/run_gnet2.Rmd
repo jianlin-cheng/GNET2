@@ -45,14 +45,13 @@ exp_data <- matrix(rnorm(600*12),600,12)
 reg_names <- paste0('TF',1:20)
 rownames(exp_data) <- c(reg_names,paste0('gene',1:(nrow(exp_data)-length(reg_names))))
 colnames(exp_data) <- paste0('condition_',1:ncol(exp_data))
-se <- SummarizedExperiment::SummarizedExperiment(assays=list(counts=exp_data))
 ```
 
 
 The module construction process make take a few time, depending on the size of data and maximum iterations allowed. 
 
 ```{r, echo=TRUE}
-gnet_result <- gnet(se,reg_names,init_method,init_group_num,heuristic = TRUE)
+gnet_result <- gnet(exp_data,reg_names,init_method,init_group_num,heuristic = TRUE)
 ```
 
 ## 4. Plot the modules and trees
