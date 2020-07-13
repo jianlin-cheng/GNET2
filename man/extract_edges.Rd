@@ -10,7 +10,7 @@ extract_edges(gnet_result)
 \item{gnet_result}{Returned results from gnet().}
 }
 \value{
-A three column edge list from the gnet result.The third column are the sum of scores of any groups with the regulator-target interaction.
+A matrix of scores of for the regulator-target interaction.
 }
 \description{
 Extract the network as edge list from the gnet result. For a module, each regulator and downstream gene will form a directed edge.
