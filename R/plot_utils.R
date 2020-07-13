@@ -160,7 +160,7 @@ plot_gene_group <- function(gnet_result,group_idx,tree_layout=1,max_gene_num=100
     
     if (nrow(exp_data2)>max_gene_num) {
       lscores <- apply(exp_data2, 1, function(x)get_range_potion(x,leaf_labels))
-      exp_data2 <- exp_data2[order(lscores)[seq_len(max_gene_num)],]
+      exp_data2 <- exp_data2[order(lscores)[1:max_gene_num],]
       
     }
     
@@ -293,16 +293,19 @@ plot_group_correlation <- function(gnet_result){
 #' save_gnet(gnet_result)
 #' @export
 save_gnet <- function(gnet_result,save_path = '.',num_module=10,max_gene_num=100){
-  dir.create(save_path,showWarnings = FALSE)
+  dir.create(save_path,showWarnings = F)
   l <- extract_edges(gnet_result)
+  l$score <- l$score/(max(l$score))
   write.csv(l,paste0(save_path,'/gnet_results.csv'))
   
-  top10g <- order(gnet_result$group_score,decreasing = TRUE)
-  for (i in top10g[seq_len(min(num_module,length(top10g)))]) {
+  top10g <- order(gnet_result$group_score,decreasing = T)
+  for (i in top10g[1:min(num_module,length(top10g))]) {
     tiff(paste0(save_path,'/module_',i,'.tiff'),compression = 'lzw')
     plot_gene_group(gnet_result,i,max_gene_num = max_gene_num)
     dev.off()
   }
   write.csv(gnet_result$gene_group_table,paste0(save_path,'/gene_group_table.csv'))
+  el <- extract_edges(gnet_result)
+  write.csv(el,paste0(save_path,'/gnet_results.csv'))
   save(gnet_result,file = paste0(save_path,'/gnet_results.rda'))
 }
