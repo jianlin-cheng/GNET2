@@ -78,7 +78,33 @@ group_above_kn <- plot_group_correlation(gnet_result)
 print(group_above_kn)
 ```
 
-The group indices in group_above_kn can been used as a list of indices of the data point with correlation higher than the knee point. You may consider use them only for further analysis.
+The group IDs in group_above_kn can been used as a list of groups with correlation higher than the knee point. You may consider use them only for further analysis.
+
+## 5. extract information from the GNET2 output
+Show the total number of modules
+
+```{r, echo=TRUE,fig.width=8, fig.height=8}
+print('Total number of modules:')
+print(gnet_result$modules_count)
+```
+
+Show the regulatory genes and target genes in the first module
+
+```{r, echo=TRUE,fig.width=8, fig.height=8}
+group_index = 1
+print('Regulators in module 1:')
+print(gnet_result$regulators[[group_index]])
+print('Targets in module 1:')
+print(gnet_result$target_genes[[group_index]])
+```
+
+Return the interactions and their scores as adjacency matrix
+
+```{r, echo=TRUE,fig.width=8, fig.height=8}
+mat <- extract_edges(gnet_result)
+print(dim(mat))
+```
+
 
 ```{r, echo=TRUE}
 sessionInfo()
