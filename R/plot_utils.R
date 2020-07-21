@@ -126,6 +126,7 @@ get_range_potion <- function(x,label){
 #' @param group_idx Index of the module.
 #' @param tree_layout zoom ratio for the regulatory tree. Default is 1. Need to be increased for trees with >5 regulators.
 #' @param max_gene_num Max size of gene to plot in the heatmap. Only genes with highest n variances will be kept.
+#' @param group_labels Labels of experiment conditions,Used for the color bar of experiment conditions. Default is NULL
 #' @return None
 #' @examples
 #' set.seed(1)
@@ -139,102 +140,163 @@ get_range_potion <- function(x,label){
 #' gnet_result <- gnet(se,reg_names,init_method,init_group_num)
 #' plot_gene_group(gnet_result,group_idx=1)
 #' @export
-plot_gene_group <- function(gnet_result,group_idx,tree_layout=1,max_gene_num=100){
-    gene_data <- gnet_result$gene_data
-    regulator_data <- gnet_result$regulator_data
-    reg_group_table <- gnet_result$reg_group_table
-    gene_group_table <- gnet_result$gene_group_table
-    exp_data1 <- gene_data[gene_group_table$gene[gene_group_table$group==group_idx],,drop=FALSE]
-    regulator_data1 <- regulator_data[reg_group_table[reg_group_table[,1]==group_idx,2]+1,]
-    group_table1 <- reg_group_table[reg_group_table[,1]==group_idx,3:ncol(reg_group_table)]
-    leaf_labels <- get_leaf_group_labels(group_table1,format_plot = TRUE)
+plot_gene_group <- function(gnet_result,group_idx,tree_layout=1,max_gene_num=100,group_labels=NULL){
+  gene_data <- gnet_result$gene_data
+  regulator_data <- gnet_result$regulator_data
+  reg_group_table <- gnet_result$reg_group_table
+  gene_group_table <- gnet_result$gene_group_table
+  exp_data1 <- gene_data[gene_group_table$gene[gene_group_table$group==group_idx],,drop=FALSE]
+  regulator_data1 <- regulator_data[reg_group_table[reg_group_table[,1]==group_idx,2]+1,]
+  group_table1 <- reg_group_table[reg_group_table[,1]==group_idx,3:ncol(reg_group_table)]
+  leaf_labels <- get_leaf_group_labels(group_table1,format_plot = TRUE)
+  
+  row_order_list <- get_row_order(group_table1,regulator_data1,exp_data1)
+  group_table2 <- row_order_list[[1]]
+  regulator_data2 <- row_order_list[[2]]
+  exp_data2 <- row_order_list[[3]]
+  
+  # group_table2 <- group_table1[,row_order,drop=FALSE]
+  # regulator_data2 <- regulator_data1[,row_order,drop=FALSE]
+  # exp_data2 <- exp_data1[,row_order,drop=FALSE]
+  
+  if (nrow(exp_data2)>max_gene_num) {
+    lscores <- apply(exp_data2, 1, function(x)get_range_potion(x,leaf_labels))
+    exp_data2 <- exp_data2[order(lscores)[seq_len(max_gene_num)],]
     
-    row_order_list <- get_row_order(group_table1,regulator_data1,exp_data1)
-    group_table2 <- row_order_list[[1]]
-    regulator_data2 <- row_order_list[[2]]
-    exp_data2 <- row_order_list[[3]]
-    
-    # group_table2 <- group_table1[,row_order,drop=FALSE]
-    # regulator_data2 <- regulator_data1[,row_order,drop=FALSE]
-    # exp_data2 <- exp_data1[,row_order,drop=FALSE]
-    
-    if (nrow(exp_data2)>max_gene_num) {
-      lscores <- apply(exp_data2, 1, function(x)get_range_potion(x,leaf_labels))
-      exp_data2 <- exp_data2[order(lscores)[seq_len(max_gene_num)],]
-      
-    }
-    
-    test_regulators_names <- rownames(regulator_data2)
+  }
+  
+  test_regulators_names <- rownames(regulator_data2)
+  if(is.null(group_labels)){
     layout=matrix(c(rep(seq_len(length(test_regulators_names)),each=tree_layout),
                     rep(length(test_regulators_names)+1,
-                        length(test_regulators_names)*2)),ncol=1)
-    regulators_plist <- list()
-    scaleFUN <- function(x) sprintf("%.3f", x)
-
-    # add Regulators bars
-    for(i in seq_len(length(test_regulators_names))){
-        reg_data_mask <- group_table2[i,]==-1
-        exp_val <- as.numeric(regulator_data2[i,])
-        exp_val[reg_data_mask] <- NA
-        lengend_low <- min(exp_val,na.rm = TRUE)
-        lengend_high <- max(exp_val,na.rm = TRUE)
-        exp_val1 <- rbind.data.frame(matrix(NA,nrow = 1,ncol = length(exp_val)),exp_val,stringsAsFactors=FALSE)
-        rownames(exp_val1) <- seq_len(nrow(exp_val1))
-        exp_val.m <- melt(exp_val1,id.vars = NULL)
-        exp_val.m <- cbind.data.frame('y_idx'=rep(seq_len(nrow(exp_val1)),ncol(exp_val1)),
-                                      exp_val.m,stringsAsFactors=FALSE)
-        exp_label <- rep('',ncol(exp_val1))
-        if(which(group_table2[i,]==0)[1] < which(group_table2[i,]==1)[1]){
-          # left low, right high
-          exp_label[max(which(group_table2[i,]==0))] <- '<- | Low'
-          exp_label[min(which(group_table2[i,]==1))] <- 'High | ->'
-        }else{
-          # left high, right low
-          exp_label[max(which(group_table2[i,]==1))] <- '<- | High'
-          exp_label[min(which(group_table2[i,]==0))] <- 'Low | ->'
-        }
-        p <- ggplot(exp_val.m, aes_string('variable', 'y_idx')) + 
-            geom_tile(aes_string(fill = 'value'), colour = "white") +
-            scale_x_discrete(labels=exp_label)+
-            scale_fill_gradient(low = "darkgreen",high = "red",na.value = "white",
-                                                    limits=c(lengend_low, lengend_high),
-                                                    breaks=seq(lengend_low,lengend_high,length.out = 4),labels=scaleFUN)+
-            theme(panel.border = element_blank(), panel.grid.major = element_blank(),
-                        panel.background = element_blank(),
-                        legend.title=element_blank(),panel.grid.minor = element_blank(),
-                        legend.key.size = unit(0.2, "cm"),
-                        axis.line = element_line(colour = "white"),legend.position="right",
-                        legend.box = "vertical",axis.title.x=element_blank(),
-                        axis.ticks.x=element_blank(),legend.text=element_text(size=7),
-                        axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())+
-            labs(title = test_regulators_names[i])
-        regulators_plist[[i]] <- p
+                        length(test_regulators_names)*2),
+                    length(test_regulators_names)+2),ncol=1)
+  }else{
+    layout=matrix(c(rep(seq_len(length(test_regulators_names)),each=tree_layout),
+                    rep(length(test_regulators_names)+1,
+                        length(test_regulators_names)*2),
+                    length(test_regulators_names)+2,
+                    length(test_regulators_names)+3 ),ncol=1)
+  }
+  
+  
+  regulators_plist <- list()
+  scaleFUN <- function(x) sprintf("%.3f", x)
+  
+  # add Regulators bars
+  for(i in seq_len(length(test_regulators_names))){
+    reg_data_mask <- group_table2[i,]==-1
+    exp_val <- as.numeric(regulator_data2[i,])
+    exp_val[reg_data_mask] <- NA
+    lengend_low <- min(exp_val,na.rm = TRUE)
+    lengend_high <- max(exp_val,na.rm = TRUE)
+    exp_val1 <- rbind.data.frame(matrix(NA,nrow = 1,ncol = length(exp_val)),exp_val,stringsAsFactors=FALSE)
+    rownames(exp_val1) <- seq_len(nrow(exp_val1))
+    exp_val.m <- melt(exp_val1,id.vars = NULL)
+    exp_val.m <- cbind.data.frame('y_idx'=rep(seq_len(nrow(exp_val1)),ncol(exp_val1)),
+                                  exp_val.m,stringsAsFactors=FALSE)
+    exp_label <- rep('',ncol(exp_val1))
+    if(which(group_table2[i,]==0)[1] < which(group_table2[i,]==1)[1]){
+      # left low, right high
+      exp_label[max(which(group_table2[i,]==0))] <- '<- | Low'
+      exp_label[min(which(group_table2[i,]==1))] <- 'High | ->'
+    }else{
+      # left high, right low
+      exp_label[max(which(group_table2[i,]==1))] <- '<- | High'
+      exp_label[min(which(group_table2[i,]==0))] <- 'Low | ->'
     }
+    p <- ggplot(exp_val.m, aes_string('variable', 'y_idx')) + 
+      geom_tile(aes_string(fill = 'value'), colour = "white") +
+      scale_x_discrete(labels=exp_label)+
+      scale_fill_gradient(low = "darkgreen",high = "red",na.value = "white",
+                          limits=c(lengend_low, lengend_high),
+                          breaks=seq(lengend_low,lengend_high,length.out = 4),labels=scaleFUN)+
+      theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+            panel.background = element_blank(),
+            legend.title=element_blank(),panel.grid.minor = element_blank(),
+            legend.key.size = unit(0.2, "cm"),
+            axis.line = element_line(colour = "white"),legend.position="right",
+            legend.box = "vertical",axis.title.x=element_blank(),
+            axis.ticks.x=element_blank(),legend.text=element_text(size=7),
+            axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())+
+      labs(title = test_regulators_names[i])
+    regulators_plist[[i]] <- p
+  }
+  
+  # add heatmap
+  exp_data2 <- as.data.frame(t(scale(t(exp_data2))))
+  suppressWarnings({d <- dist(exp_data2, method = "euclidean")})
+  fit <- hclust(d, method="ward.D")
+  exp_data2 <- exp_data2[fit$order,]
+  exp_lengend_low <- min(exp_data2)
+  exp_lengend_high <- max(exp_data2)
+  test_data.m <- melt(cbind.data.frame('gene'=rownames(exp_data2),exp_data2,stringsAsFactors=FALSE),id.vars = 'gene')
+  p <- ggplot(test_data.m, aes_string('variable', 'gene')) + 
+    geom_tile(aes_string(fill = 'value'), colour = "white") +
+    scale_fill_gradient(low = "darkgreen",high = "red",na.value = "white",
+                        limits=c(exp_lengend_low, exp_lengend_high),
+                        breaks=seq(exp_lengend_low,exp_lengend_high,length.out = 4),labels=scaleFUN)+
+    theme(axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank(),
+          axis.title.x=element_blank(),legend.text=element_text(size=7),
+          legend.key.size = unit(0.2, "cm"),
+          panel.border = element_blank(), panel.grid.major = element_blank(),
+          panel.background = element_blank(),legend.title=element_blank(),
+          axis.text.x = element_text(angle = 45, hjust = 1),
+          panel.grid.minor = element_blank(), axis.line = element_line(colour = "white"),
+          legend.position="right", legend.box = "vertical")
+  
+  regulators_plist[[length(regulators_plist)+1]] <- p
+  
+  # add color bar for group index
+  
+  names(leaf_labels) <- colnames(regulator_data1)
+  leaf_labels2 <- leaf_labels[colnames(regulator_data2)]
+  cluster_idx <- as.numeric(factor(leaf_labels2))
+  ddf= exp_val.m
+  ddf[ddf$y_idx==2 ,3] <- paste0('Group',cluster_idx)
+  ddf[ddf$y_idx==1 ,3] <- NA
+  ddf$value <- factor(ddf$value)
+  p_cluster <- ggplot(ddf, aes_string('variable', 'y_idx')) + 
+    geom_tile(aes_string(fill = 'value'), colour = "white") +
+    scale_fill_discrete(na.translate=FALSE)+
+    theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+          panel.background = element_blank(),
+          legend.title=element_blank(),panel.grid.minor = element_blank(),
+          legend.key.size = unit(0.2, "cm"),
+          axis.line = element_line(colour = "white"),legend.position="right",
+          legend.box = "vertical",
+          axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),legend.text=element_text(size=7),
+          axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())+
+    labs(title = 'Clusters')
+  regulators_plist[[length(regulators_plist)+1]] <- p_cluster
+  
+  if(!is.null(group_labels)){
+    names(group_labels) <- colnames(regulator_data1)
+    group_labels2 <- group_labels[colnames(regulator_data2)]
     
-    # add heatmap
-    exp_data2 <- as.data.frame(t(scale(t(exp_data2))))
-    suppressWarnings({d <- dist(exp_data2, method = "euclidean")})
-    fit <- hclust(d, method="ward")
-    exp_data2 <- exp_data2[fit$order,]
-    exp_lengend_low <- min(exp_data2)
-    exp_lengend_high <- max(exp_data2)
-    test_data.m <- melt(cbind.data.frame('gene'=rownames(exp_data2),exp_data2,stringsAsFactors=FALSE),id.vars = 'gene')
-    p <- ggplot(test_data.m, aes_string('variable', 'gene')) + 
-        geom_tile(aes_string(fill = 'value'), colour = "white") +
-        scale_fill_gradient(low = "darkgreen",high = "red",na.value = "white",
-                                                limits=c(exp_lengend_low, exp_lengend_high),
-                                                breaks=seq(exp_lengend_low,exp_lengend_high,length.out = 4),labels=scaleFUN)+
-        theme(axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank(),
-                    axis.title.x=element_blank(),legend.text=element_text(size=7),
-                    legend.key.size = unit(0.2, "cm"),
-                    panel.border = element_blank(), panel.grid.major = element_blank(),
-                    panel.background = element_blank(),legend.title=element_blank(),
-                    axis.text.x = element_text(angle = 45, hjust = 1),
-                    panel.grid.minor = element_blank(), axis.line = element_line(colour = "white"),
-                    legend.position="right", legend.box = "vertical")
-    regulators_plist[[length(regulators_plist)+1]] <- p
-    multiplot(plotlist = regulators_plist,cols = 1,layout = layout)
+    ddf= exp_val.m
+    ddf[ddf$y_idx==2 ,3] <- group_labels2
+    ddf[ddf$y_idx==1 ,3] <- NA      
+    ddf$value <- factor(ddf$value)
+    p_exp <- ggplot(ddf, aes_string('variable', 'y_idx')) + 
+      geom_tile(aes_string(fill = 'value'), colour = "white") +
+      scale_fill_discrete(na.translate=FALSE)+
+      theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+            panel.background = element_blank(),
+            legend.title=element_blank(),panel.grid.minor = element_blank(),
+            legend.key.size = unit(0.2, "cm"),
+            axis.line = element_line(colour = "white"),legend.position="right",
+            legend.box = "vertical",
+            axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),legend.text=element_text(size=7),
+            axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())+
+      labs(title = 'Experiment Conditions')
+    
+    regulators_plist[[length(regulators_plist)+1]] <- p_exp
+  }
+  
+  multiplot(plotlist = regulators_plist,cols = 1,layout = layout)
 }
+
 
 #' Plot the correlation of each group
 #' 

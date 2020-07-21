@@ -628,3 +628,97 @@ extract_edges <- function(gnet_result){
   }
   return(mat)
 }
+
+get_sample_cluster <- function(group_table,group_idx){
+  group_table <- group_table[group_table[,1]==group_idx,3:ncol(group_table),drop=FALSE]
+  leaf_label <- rep(0,ncol(group_table))
+  next_label <- 0
+  for(i in seq_len(nrow(group_table))){
+    current_label <- group_table[i,]
+    for(j in c(0,1)){
+      leaf_label[current_label==j] <- next_label
+      next_label <- next_label+1
+    }
+  }
+  return(as.numeric(factor(leaf_label)))
+}
+
+ari <- function (x, y){
+  tab <- table(x, y)
+  if (all(dim(tab) == c(1, 1))) 
+    return(1)
+  a <- sum(choose(tab, 2))
+  b <- sum(choose(rowSums(tab), 2)) - a
+  c <- sum(choose(colSums(tab), 2)) - a
+  d <- choose(sum(tab), 2) - a - b - c
+  ARI <- (a - (a + b) * (a + c)/(a + b + c + d))/((a + b + 
+                                                     a + c)/2 - (a + b) * (a + c)/(a + b + c + d))
+  return(ARI)
+}
+
+similarity_score_unranked <- function(gnet_result,group){
+  s_list<- rep(0,gnet_result$modules_count)
+  for (i in seq_len(gnet_result$modules_count)) {
+    s_list[i] <- ari(get_sample_cluster(gnet_result$reg_group_table,i),group)
+  }
+  return(s_list)
+}
+
+similarity_score_ranked <- function(gnet_result,group){
+  kld <- rep(0,gnet_result$modules_count)
+  for (i in seq_len(gnet_result$modules_count)) {
+    group_module <- get_sample_cluster(gnet_result$reg_group_table,i)
+    group_module_dist <- as.matrix(dist(group_module))
+    group_dist <- as.matrix(dist(group))
+    
+    p <- dnorm(group_dist*group_dist,0,sqrt(max(group_dist)))
+    q <- dnorm(group_module_dist*group_module_dist,0,sqrt(max(group_module_dist)))
+    
+    
+    for (j in seq_len(nrow(group_dist))) {
+      p[j,] <- p[j,]/(sum(p[j,])-p[j,])
+      q[j,] <- q[j,]/(sum(q[j,])-q[j,])
+    }
+    
+    p1 <- p[upper.tri(p)]
+    q1 <- q[upper.tri(q)]
+    
+    kld[i] <- sum(p1*log(p1/q1))
+  }
+  
+  s_list <- -(kld-mean(kld))/sd(kld)
+  return(s_list)
+}
+
+#' Compute the similarity from a predefined condition group
+#' 
+#' Compute the similarity between a predefined condition grouping and the sample cluster of each module, which is defined
+#' as the Adjusted Rand index between the two vectors, or the inverse of K-L divergence between the upper triangle matrix 
+#' of the pairwise distance of predefined ranked condition grouping and the pairwise distance of sample cluster of each module.
+#' @param gnet_result Returned results from gnet().
+#' @param group predefined condition grouping
+#' @param ranked the grouping information is categorical(treatment/control) or ordinal(dosage, time points)?
+#' 
+#' @return A list of similarity scores between a predefined condition grouping and the sample cluster of each module.
+#' @examples
+#' set.seed(1)
+#' init_group_num = 8
+#' init_method = 'kmeans'
+#' exp_data <- matrix(rnorm(50*10),50,10)
+#' reg_names <- paste0('TF',1:5)
+#' rownames(exp_data) <- c(reg_names,paste0('gene',1:(nrow(exp_data)-length(reg_names))))
+#' colnames(exp_data) <- paste0('condition_',1:ncol(exp_data))
+#' se <- SummarizedExperiment::SummarizedExperiment(assays=list(counts=exp_data))
+#' gnet_result <- gnet(se,reg_names,init_method,init_group_num)
+#' s <- similarity_score(gnet_result,rep(1:5,each = 2))
+#' @export
+similarity_score <- function(gnet_result,group,ranked=FALSE){
+    if(ranked){
+      return(similarity_score_ranked(gnet_result,group))
+    }else{
+      return(similarity_score_unranked(gnet_result,group))
+    }
+}
+
+
+
