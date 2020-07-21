@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 
 ## 1. Introduction
 GNET2 is a R package used for build regulator network and cluster genes to functional groups with E-M process.
-It iteratively perform TF assigning and Gene assigning, until the assignment of genes did not change, or max number of iterations is reached.
+It iterative perform TF assigning and Gene assigning, until the assignment of genes did not change, or max number of iterations is reached.
 
 ## 2. Installation
 To install, open R and type:
@@ -41,26 +41,53 @@ The input is typically a p by n matrix of expression data of p genes and n sampl
 set.seed(2)
 init_group_num = 8
 init_method = 'boosting'
-exp_data <- matrix(rnorm(600*12),600,12)
+exp_data <- matrix(rnorm(300*12),300,12)
 reg_names <- paste0('TF',1:20)
 rownames(exp_data) <- c(reg_names,paste0('gene',1:(nrow(exp_data)-length(reg_names))))
 colnames(exp_data) <- paste0('condition_',1:ncol(exp_data))
-se <- SummarizedExperiment::SummarizedExperiment(assays=list(counts=exp_data))
 ```
 
+
+For the list of potential regulator genes, they are usually available from databases. For example, the PlantTFDB (http://planttfdb.gao-lab.org/download.php) curated lists of transcription factors in 156 species, and this information can be imported by the follow steps:
+
+```
+url <- "http://planttfdb.gao-lab.org/download/TF_list/Ath_TF_list.txt.gz"
+dest_file <- './Ath_TF_list.txt.gz'
+download.file(url, destfile)
+reg_names <- read.table(gzfile(destfile),sep="\t",header = T,as.is = T)$Gene_ID
+```
 
 The module construction process make take a few time, depending on the size of data and maximum iterations allowed. 
 
 ```{r, echo=TRUE}
-gnet_result <- gnet(se,reg_names,init_method,init_group_num,heuristic = TRUE)
+gnet_result <- gnet(exp_data,reg_names,init_method,init_group_num,heuristic = TRUE)
 ```
 
 ## 4. Plot the modules and trees
 Plot the regulators module and heatmap of the expression inferred downstream genes for each sample. It can be interpreted as two parts:
-the bars at the top shows how samples are splited by the regression tree and the heatmap at the bottom shows how downstream genes are regulated by each subgroup determined by the regulators.
+the bars at the top shows how samples are split by the regression tree and the heatmap at the bottom shows how downstream genes are regulated by each subgroup determined by the regulators.
 
 ```{r, echo=TRUE,fig.width=10, fig.height=12}
 plot_gene_group(gnet_result,group_idx = 1)
+```
+
+It is also possible to compare the clustering of GNET2 with experiment conditions by providing the labels of conditions
+
+```{r, echo=TRUE,fig.width=10, fig.height=12}
+exp_labels = rep(paste0('Exp_',1:4),each = 3)
+plot_gene_group(gnet_result,group_idx = 1,group_labels = exp_labels)
+```
+
+The similarity between the clusters from each module of GNET2 and experiment conditions can be quantified by Adjuster Rand Index (for categorical labels) or the inverse of K-L Divergence (for ordinal labels, e.g. dosage,time points). Higher similarity represents the consistency between the predicted regulatory patterns and experimental conditions.
+
+```{r, echo=TRUE,fig.width=10, fig.height=12}
+exp_labels_factor = as.numeric(factor(exp_labels))
+
+print('Similarity to categorical experimental conditions of each module:')
+print(similarity_score(gnet_result,exp_labels_factor))
+
+print('Similarity to ordinal experimental conditions of each module:')
+print(similarity_score(gnet_result,exp_labels_factor),ranked=TRUE)
 ```
 
 
