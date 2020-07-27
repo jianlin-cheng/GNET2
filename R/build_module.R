@@ -384,14 +384,14 @@ kneepointDetection <- function (vect){
 
 
 assign_first_cluster <- function(gene_data,regulator_data,max_depth,init_group_num,
-                                 init_method='boosting',max_group=5){
+                                 init_method='boosting',max_group=5,nthread = 4){
     if(init_method=='boosting'){
         ipt_mat <- matrix(0,nrow = nrow(gene_data),ncol = nrow(regulator_data))
         rownames(ipt_mat) <- rownames(gene_data)
         colnames(ipt_mat) <- rownames(regulator_data)
         for(i in seq_len(nrow(gene_data))){
             dtrain <- xgb.DMatrix(data = t(regulator_data), label=gene_data[i,])
-            bst <- xgb.train(data=dtrain, max.depth=max_depth, eta=0.1, nthread = 4,nrounds =2)
+            bst <- xgb.train(data=dtrain, max.depth=max_depth, eta=0.1, nthread = nthread,nrounds =2)
             if(length(xgb.dump(model = bst, with_stats = TRUE))!=4){
               # A constant tree: no predictors were used. 
               importance_matrix <- xgb.importance(model = bst)
@@ -420,10 +420,10 @@ assign_first_cluster <- function(gene_data,regulator_data,max_depth,init_group_n
 
 run_gnet <- function(gene_data,regulator_data,init_method = 'boosting',init_group_num = 5,max_depth = 3,
                      cor_cutoff = 0.9,min_divide_size = 3,min_group_size = 2,max_iter = 5,heuristic = TRUE,
-                     max_group=5,force_split = 0.5){
+                     max_group=5,force_split = 0.5,nthread = 4){
     message('Determining initial group number...')
     gene_group_table <- assign_first_cluster(gene_data,regulator_data,max_depth,
-                                             init_group_num,init_method,max_group)
+                                             init_group_num,init_method,max_group,nthread = nthread)
     split_table <- build_split_table(t(regulator_data))
     message('Building module networks...')
     for (i in seq_len(max_iter)) {
@@ -481,6 +481,7 @@ run_gnet <- function(gene_data,regulator_data,init_method = 'boosting',init_grou
 #' @param heuristic If the splites of the regression tree is determined by k-means heuristicly.
 #' @param max_group Max number of group allowed for the first clustering step, default equals init_group_num and is set to 0.
 #' @param force_split Force split the largest gene group into smaller groups by kmeans. Default is 0.5(Split if it contains more than half target genes)
+#' @param nthread Number of threads to run GBDT based clustering
 #' 
 #' @return A list of expression data of genes, expression data of regulators, within group score, table of tree 
 #' structure and final assigned group of each gene.
@@ -497,7 +498,7 @@ run_gnet <- function(gene_data,regulator_data,init_method = 'boosting',init_grou
 #' @export
 gnet <- function(input,reg_names,init_method= 'boosting',init_group_num = 4,max_depth = 3,
                  cor_cutoff = 0.9,min_divide_size = 3,min_group_size = 2,max_iter = 5,
-                 heuristic = TRUE,max_group = 0,force_split = 0.5){
+                 heuristic = TRUE,max_group = 0,force_split = 0.5,nthread = 4){
     if(is(input,class2 = "SummarizedExperiment")){
         input <- assay(input)
     }
@@ -508,7 +509,7 @@ gnet <- function(input,reg_names,init_method= 'boosting',init_group_num = 4,max_
     gene_data <- input[!rownames(input)%in%reg_names,,drop=FALSE]
     regulator_data <- input[reg_names,,drop=FALSE]
     result_all <- run_gnet(gene_data,regulator_data,init_method,init_group_num,max_depth,cor_cutoff,
-                           min_divide_size,min_group_size,max_iter,heuristic,max_group,force_split)
+                           min_divide_size,min_group_size,max_iter,heuristic,max_group,force_split,nthread = nthread)
     reg_group_table <- result_all[[1]]
     gene_group_table <- result_all[[2]]
     
