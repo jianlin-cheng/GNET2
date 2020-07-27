@@ -68,7 +68,7 @@ Plot the regulators module and heatmap of the expression inferred downstream gen
 the bars at the top shows how samples are split by the regression tree and the heatmap at the bottom shows how downstream genes are regulated by each subgroup determined by the regulators.
 
 ```{r, echo=TRUE,fig.width=10, fig.height=12}
-plot_gene_group(gnet_result,group_idx = 1)
+plot_gene_group(gnet_result,group_idx = 1,plot_leaf_labels = T)
 ```
 
 It is also possible to compare the clustering of GNET2 with experiment conditions by providing the labels of conditions

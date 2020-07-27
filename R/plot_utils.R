@@ -126,6 +126,7 @@ get_range_potion <- function(x,label){
 #' @param group_idx Index of the module.
 #' @param tree_layout zoom ratio for the regulatory tree. Default is 1. Need to be increased for trees with >5 regulators.
 #' @param max_gene_num Max size of gene to plot in the heatmap. Only genes with highest n variances will be kept.
+#' @param plot_leaf_labels If the plot includes a color bar of leaf labels at the bottom.
 #' @param group_labels Labels of experiment conditions,Used for the color bar of experiment conditions. Default is NULL
 #' @return None
 #' @examples
@@ -140,7 +141,7 @@ get_range_potion <- function(x,label){
 #' gnet_result <- gnet(se,reg_names,init_method,init_group_num)
 #' plot_gene_group(gnet_result,group_idx=1)
 #' @export
-plot_gene_group <- function(gnet_result,group_idx,tree_layout=1,max_gene_num=100,group_labels=NULL){
+plot_gene_group <- function(gnet_result,group_idx,tree_layout=1,max_gene_num=100,plot_leaf_labels=TRUE,group_labels=NULL){
   gene_data <- gnet_result$gene_data
   regulator_data <- gnet_result$regulator_data
   reg_group_table <- gnet_result$reg_group_table
@@ -248,27 +249,29 @@ plot_gene_group <- function(gnet_result,group_idx,tree_layout=1,max_gene_num=100
   regulators_plist[[length(regulators_plist)+1]] <- p
   
   # add color bar for group index
-  
-  names(leaf_labels) <- colnames(regulator_data1)
-  leaf_labels2 <- leaf_labels[colnames(regulator_data2)]
-  cluster_idx <- as.numeric(factor(leaf_labels2))
-  ddf= exp_val.m
-  ddf[ddf$y_idx==2 ,3] <- paste0('Group',cluster_idx)
-  ddf[ddf$y_idx==1 ,3] <- NA
-  ddf$value <- factor(ddf$value)
-  p_cluster <- ggplot(ddf, aes_string('variable', 'y_idx')) + 
-    geom_tile(aes_string(fill = 'value'), colour = "white") +
-    scale_fill_discrete(na.translate=FALSE)+
-    theme(panel.border = element_blank(), panel.grid.major = element_blank(),
-          panel.background = element_blank(),
-          legend.title=element_blank(),panel.grid.minor = element_blank(),
-          legend.key.size = unit(0.2, "cm"),
-          axis.line = element_line(colour = "white"),legend.position="right",
-          legend.box = "vertical",
-          axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),legend.text=element_text(size=7),
-          axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())+
-    labs(title = 'Clusters')
-  regulators_plist[[length(regulators_plist)+1]] <- p_cluster
+  if(plot_leaf_labels){
+    names(leaf_labels) <- colnames(regulator_data1)
+    leaf_labels2 <- leaf_labels[colnames(regulator_data2)]
+    cluster_idx <- as.numeric(factor(leaf_labels2))-1
+    ddf= exp_val.m
+    ddf[ddf$y_idx==2 ,3] <- paste0('Leaf',cluster_idx)
+    ddf[ddf$y_idx==1 ,3] <- NA
+    ddf$value <- factor(ddf$value)
+    p_cluster <- ggplot(ddf, aes_string('variable', 'y_idx')) + 
+      geom_tile(aes_string(fill = 'value'), colour = "white") +
+      scale_fill_discrete(na.translate=FALSE)+
+      theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+            panel.background = element_blank(),
+            legend.title=element_blank(),panel.grid.minor = element_blank(),
+            legend.key.size = unit(0.2, "cm"),
+            axis.line = element_line(colour = "white"),legend.position="right",
+            legend.box = "vertical",
+            axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank(),legend.text=element_text(size=7),
+            axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())+
+      labs(title = 'Clusters')
+    regulators_plist[[length(regulators_plist)+1]] <- p_cluster
+  }
+
   
   if(!is.null(group_labels)){
     names(group_labels) <- colnames(regulator_data1)
