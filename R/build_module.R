@@ -534,8 +534,8 @@ gnet <- function(input,reg_names,init_method= 'boosting',init_group_num = 4,max_
             cor_m <- cor(t(gene_data[current_gene_group$gene,,drop=FALSE]))
             avg_cor_list <- c(avg_cor_list,mean(cor_m[upper.tri(cor_m)]))
             
-            regulators[[i]] <- rownames(regulator_data)[reg_group_table_filtered[,2]+1]
-            target_genes[[i]] <- gene_group_table_filtered$gene
+            regulators[[i]] <- rownames(regulator_data)[current_tree[,2]+1]
+            target_genes[[i]] <- current_gene_group$gene
             current_group_idx <- current_group_idx + 1
         }
     }

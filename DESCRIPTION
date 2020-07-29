@@ -1,7 +1,7 @@
 Package: GNET2
 Type: Package
 Title: Constructing gene regulatory networks from expression data through functional module inference
-Version: 1.5.3
+Version: 1.5.4
 Author: Chen Chen, Jie Hou and Jianlin Cheng
 Maintainer: Chen Chen <ccm3x@mail.missouri.edu>
 Description: Cluster genes to functional groups with E-M process.
@@ -11,7 +11,7 @@ Encoding: UTF-8
 LazyData: true
 LinkingTo: Rcpp
 Depends:
-    R (>= 3.3)
+    R (>= 3.6)
 Imports:
     ggplot2,xgboost,Rcpp,reshape2,grid,DiagrammeR,methods,stats,matrixStats,graphics,SummarizedExperiment,dplyr,igraph, grDevices, utils
 RoxygenNote: 7.1.0
