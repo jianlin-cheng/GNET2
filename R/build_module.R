@@ -575,16 +575,20 @@ sum_scores <- function(el_all,el_input){
 #' edge_list <- extract_edges(gnet_result)
 #' @export
 extract_edges <- function(gnet_result){
-  el <- NULL
-  groups <- min(length(gnet_result$group_score),length(unique(gnet_result$reg_group_table[,1])))
-  for (i in seq_len(groups)) {
-    tf_i <- rownames(gnet_result$regulator_data)[gnet_result$reg_group_table[gnet_result$reg_group_table[,1]==i,2]+1]
-    if(sum(is.na(tf_i))>0)print(i)
-    gene_i <- gnet_result$gene_group_table$gene[gnet_result$gene_group_table$group==i]
-    d <- rbind.data.frame(expand.grid(tf_i,tf_i,stringsAsFactors =FALSE),
-                          expand.grid(tf_i,gene_i,stringsAsFactors =FALSE),stringsAsFactors =FALSE)
-    d <- cbind.data.frame(d,gnet_result$group_score[i],stringsAsFactors =FALSE)
-    el <- rbind.data.frame(el,d,stringsAsFactors =FALSE)
+  n_el <- sum(sapply(gnet_result$regulators, length) *sapply(gnet_result$target_genes, length))+ 
+    sum(sapply(gnet_result$regulators, length) *sapply(gnet_result$regulators, length))
+  el <- data.frame(matrix(0,nrow = n_el,ncol = 3))
+  current_start = 1
+  for (i in seq_len(gnet_result$modules_count)) {
+    nr <- length(gnet_result$regulators[[i]])
+    el[current_start:(current_start+nr^2-1),1:2] <- expand.grid(gnet_result$regulators[[i]],gnet_result$regulators[[i]],stringsAsFactors =FALSE)
+    el[current_start:(current_start+nr^2-1),3] <- gnet_result$group_score[i]
+    current_start <- current_start+nr^2
+    
+    nr <- length(gnet_result$regulators[[i]]) * length(gnet_result$target_genes[[i]])
+    el[current_start:(current_start+nr-1),1:2] <- expand.grid(gnet_result$regulators[[i]],gnet_result$target_genes[[i]],stringsAsFactors =FALSE)
+    el[current_start:(current_start+nr-1),3] <- gnet_result$group_score[i]
+    current_start <- current_start+nr
   }
   
   g_all <- graph_from_edgelist(as.matrix(el[,c(1,2)]),directed = FALSE)
@@ -601,7 +605,7 @@ extract_edges <- function(gnet_result){
   el2$score <- el2$score/max(el2$score)
   rownames(el2) <- seq_len(nrow(el2))
   
- 
+  
   result_gnet <- dcast(el,regulator~target,value.var="score",fill = 0)
   rownames(result_gnet) <- result_gnet$regulator
   result_gnet <- result_gnet[,2:ncol(result_gnet)]
@@ -612,22 +616,23 @@ extract_edges <- function(gnet_result){
   mat  <- matrix(0,nrow = length(reg_list),ncol = length(target_list))
   rownames(mat) <- reg_list
   colnames(mat) <- target_list
-  for (i in rownames(result_gnet)) {
-    for (j in colnames(result_gnet)) {
-      if(j %in% rownames(gnet_result$gene_data)){
-        target_vals <- gnet_result$gene_data[j,]
-      }else{
-        target_vals <- gnet_result$regulator_data[j,]
-      }
-      mim <- cor(as.numeric(gnet_result$regulator_data[i,]),
-                 as.numeric(target_vals),
-                 method = 'spearman', use = "complete.obs")^2
-      if(is.na(mim) | i==j) mim <- 0
-      mat[i,j] <- result_gnet[i,j] - 2 * log(1 - min(mim,1-1e-6))
-      
-    }
-  }
+  
+  
+  cor_all <- cor(t(rbind(gnet_result$regulator_data,gnet_result$gene_data)),
+                 method = 'spearman', use = "complete.obs")
+  diag(cor_all) <- 0
+  cor_all2 <- cor_all[rownames(result_gnet),colnames(result_gnet)]
+  cor_all2[is.na(cor_all2)] <- 0
+  cor_all2 <- cor_all2^2
+  cor_all2[cor_all2>1-1e-6] <- 1-1e-6
+  
+  v <- as.matrix(result_gnet - 2 * log(1 - cor_all2))
+  
+  
+  
+  mat[rownames(v),colnames(v)] <- v
   return(mat)
+  
 }
 
 get_sample_cluster <- function(group_table,group_idx){
