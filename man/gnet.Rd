@@ -16,7 +16,8 @@ gnet(
   max_iter = 5,
   heuristic = TRUE,
   max_group = 0,
-  force_split = 0.5
+  force_split = 0.5,
+  nthread = 4
 )
 }
 \arguments{
@@ -45,6 +46,8 @@ average correlation greater or equal to this, the node would not split anymore.}
 \item{max_group}{Max number of group allowed for the first clustering step, default equals init_group_num and is set to 0.}
 
 \item{force_split}{Force split the largest gene group into smaller groups by kmeans. Default is 0.5(Split if it contains more than half target genes)}
+
+\item{nthread}{Number of threads to run GBDT based clustering}
 }
 \value{
 A list of expression data of genes, expression data of regulators, within group score, table of tree 
