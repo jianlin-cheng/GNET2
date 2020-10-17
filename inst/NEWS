@@ -1,3 +1,6 @@
+1.5.5
+  - Add function for similarity scores between given labels for samples and the clustering in each predicted module.
+  
 1.5.2
   - extract_edges() now returns an adjacency matrix for interations and their scores.
 

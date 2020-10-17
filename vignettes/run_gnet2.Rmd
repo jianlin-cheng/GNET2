@@ -78,7 +78,7 @@ exp_labels = rep(paste0('Exp_',1:4),each = 3)
 plot_gene_group(gnet_result,group_idx = 1,group_labels = exp_labels)
 ```
 
-The similarity between the clusters from each module of GNET2 and experiment conditions can be quantified by Adjuster Rand Index (for categorical labels) or the inverse of K-L Divergence (for ordinal labels, e.g. dosage,time points). Higher similarity represents the consistency between the predicted regulatory patterns and experimental conditions.
+The similarity between the clusters from each module of GNET2 and experiment conditions can be quantified by Adjuster Rand Index (for categorical labels) or the inverse of K-L Divergence (for ordinal labels, e.g. dosage,time points). For both cases, significant P values suggests high similarity between the grouping of the modules and the label information provided by the user. 
 
 ```{r, echo=TRUE,fig.width=10, fig.height=12}
 exp_labels_factor = as.numeric(factor(exp_labels))
