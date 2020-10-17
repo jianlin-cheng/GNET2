@@ -653,35 +653,37 @@ ari <- function (x, y){
 similarity_score_unranked <- function(gnet_result,group){
   s_list<- rep(0,gnet_result$modules_count)
   for (i in seq_len(gnet_result$modules_count)) {
-    s_list[i] <- ari(get_sample_cluster(gnet_result$reg_group_table,i),group)
+    gnet_groups <- get_sample_cluster(gnet_result$reg_group_table,i)
+    s_list[i] <- ari(gnet_groups,group)
   }
   return(s_list)
+}
+
+compute_kld <- function(gnet_groups,group){
+  group_module_dist <- as.matrix(dist(gnet_groups))
+  group_dist <- as.matrix(dist(group))
+  p <- dnorm(group_dist*group_dist,0,sqrt(max(group_dist)))
+  q <- dnorm(group_module_dist*group_module_dist,0,sqrt(max(group_module_dist)))
+
+  for (j in seq_len(nrow(group_dist))) {
+    p[j,] <- p[j,]/(sum(p[j,])-p[j,])
+    q[j,] <- q[j,]/(sum(q[j,])-q[j,])
+  }
+  
+  p1 <- p[upper.tri(p)]
+  q1 <- q[upper.tri(q)]
+  
+  return(sum(p1*log(p1/q1)))
 }
 
 similarity_score_ranked <- function(gnet_result,group){
   kld <- rep(0,gnet_result$modules_count)
   for (i in seq_len(gnet_result$modules_count)) {
-    group_module <- get_sample_cluster(gnet_result$reg_group_table,i)
-    group_module_dist <- as.matrix(dist(group_module))
-    group_dist <- as.matrix(dist(group))
+    gnet_groups <- get_sample_cluster(gnet_result$reg_group_table,i)
     
-    p <- dnorm(group_dist*group_dist,0,sqrt(max(group_dist)))
-    q <- dnorm(group_module_dist*group_module_dist,0,sqrt(max(group_module_dist)))
-    
-    
-    for (j in seq_len(nrow(group_dist))) {
-      p[j,] <- p[j,]/(sum(p[j,])-p[j,])
-      q[j,] <- q[j,]/(sum(q[j,])-q[j,])
-    }
-    
-    p1 <- p[upper.tri(p)]
-    q1 <- q[upper.tri(q)]
-    
-    kld[i] <- sum(p1*log(p1/q1))
+    kld[i] <- compute_kld(gnet_groups,group)
   }
-  
-  s_list <- -(kld-mean(kld))/sd(kld)
-  return(s_list)
+  return(kld)
 }
 
 #' Compute the similarity from a predefined condition group
@@ -693,7 +695,7 @@ similarity_score_ranked <- function(gnet_result,group){
 #' @param group predefined condition grouping
 #' @param ranked the grouping information is categorical(treatment/control) or ordinal(dosage, time points)?
 #' 
-#' @return A list of similarity scores between a predefined condition grouping and the sample cluster of each module.
+#' @return A list of similarity scores between a predefined condition grouping and the sample cluster of each module, and the p values for the similarity scores based on permutation.
 #' @examples
 #' set.seed(1)
 #' init_group_num = 8
@@ -707,11 +709,21 @@ similarity_score_ranked <- function(gnet_result,group){
 #' s <- similarity_score(gnet_result,rep(1:5,each = 2))
 #' @export
 similarity_score <- function(gnet_result,group,ranked=FALSE){
+    labels_permute <- matrix(sample(unique(group),length(group)*10^3,replace = T),
+                             nrow = 10^3,byrow = T)
     if(ranked){
-      return(similarity_score_ranked(gnet_result,group))
+      score_permute <- apply(labels_permute,1,function(x)compute_kld(x,group))
+      score_gnet <- similarity_score_ranked(gnet_result,group)
+      # For K-L Divergence, smaller for higher similarity
+      p_val <- sapply(score_gnet, function(x)mean(score_permute<x))
     }else{
-      return(similarity_score_unranked(gnet_result,group))
+      score_permute <- apply(labels_permute,1,function(x)ari(x,group))
+      score_gnet <- similarity_score_unranked(gnet_result,group)
+      # For ARI, larger for higher similarity
+      p_val <- sapply(score_gnet, function(x)mean(score_permute>x)) 
+
     }
+    return(list('score' = score_gnet, 'p_value' = p_val))
 }
 
 

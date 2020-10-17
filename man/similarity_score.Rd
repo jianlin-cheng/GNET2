@@ -14,7 +14,7 @@ similarity_score(gnet_result, group, ranked = FALSE)
 \item{ranked}{the grouping information is categorical(treatment/control) or ordinal(dosage, time points)?}
 }
 \value{
-A list of similarity scores between a predefined condition grouping and the sample cluster of each module.
+A list of similarity scores between a predefined condition grouping and the sample cluster of each module, and the p values for the similarity scores based on permutation.
 }
 \description{
 Compute the similarity between a predefined condition grouping and the sample cluster of each module, which is defined

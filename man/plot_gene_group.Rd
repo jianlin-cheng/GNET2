@@ -9,6 +9,7 @@ plot_gene_group(
   group_idx,
   tree_layout = 1,
   max_gene_num = 100,
+  plot_leaf_labels = TRUE,
   group_labels = NULL
 )
 }
@@ -20,6 +21,8 @@ plot_gene_group(
 \item{tree_layout}{zoom ratio for the regulatory tree. Default is 1. Need to be increased for trees with >5 regulators.}
 
 \item{max_gene_num}{Max size of gene to plot in the heatmap. Only genes with highest n variances will be kept.}
+
+\item{plot_leaf_labels}{If the plot includes a color bar of leaf labels at the bottom.}
 
 \item{group_labels}{Labels of experiment conditions,Used for the color bar of experiment conditions. Default is NULL}
 }
